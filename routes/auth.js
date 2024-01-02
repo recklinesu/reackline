@@ -88,7 +88,7 @@ routes.post("/signin", [
         }else if(value.length < 6){
             throw new Error("The password must contain at least six characters.")
         } else return true;
-    })
+    }),
 ], async (req, res) => {
     const errors = validationResult(req);
 
