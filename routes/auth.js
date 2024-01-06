@@ -123,6 +123,7 @@ routes.post("/signin", [
 
 routes.get("/get-users", jwtVerify,(req, res) => {
     res.send(req.user)
+    res.render("/get-user")
 })
 
 
