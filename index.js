@@ -9,7 +9,10 @@ connectToMongo();
 
 
 // Routes
-app.use('/api/auth', require('./routes/auth'))
+app.use('', require('./routes/auth'))
+app.set('view engine','ejs');
+
+
 
 app.listen(port, (req, res)=>{
     console.log(`App is listening on post ${port}`);

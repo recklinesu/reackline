@@ -109,9 +109,9 @@ routes.post("/signin", [
         userData = {
             user_id: user._id
         }
-
+        // res.send("login success")
         return res.status(200).json({status: true, message: "User has been logged in successfully!", userToken: encryptData(jwt.sign(userData, process.env.JWT_KEY))})
-
+        
     } catch (error) {
         return res.status(500).send({
             status: false,
@@ -123,18 +123,11 @@ routes.post("/signin", [
 
 routes.get("/get-users", jwtVerify,(req, res) => {
     res.send(req.user)
-    res.render("/get-user")
+
 })
-
-
-
-
-
-
-
-
-
-
+routes.get("/",(req,res)=>{
+    res.render("signin")
+})
 
 
 
