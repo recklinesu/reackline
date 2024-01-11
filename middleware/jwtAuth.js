@@ -1,45 +1,46 @@
-var aes256 = require('aes256')
-var jwt = require('jsonwebtoken')
-const express = require("express")
-const Users = require('../models/user')
-require("dotenv").config()
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const Users = require("../models/user");
+const aes256 = require("aes256");
+require("dotenv").config();
 
+const jwtVerify = async (req, res, next) => {
+  try {
+    const token = decryptData(req.headers["user-token"]);
 
-const jwtVerify = async (req, res, next) =>{
-
-    try {
-        const token = decryptData(req.headers['user-token'])
-
-        if(!token) return res.status(401).send({auth: false, error: "Unauthorized", message: 'No token provided.'})
-
-        const data = jwt.verify(token, process.env.JWT_KEY)
-
-        const user_id = data.user_id
-
-        const user = await Users.findById(user_id).select("-password")
-
-        if(!user){
-            return res.status(403).send({auth: false, error: "Unauthorized", message: 'Access token expired!'})
-        }
-
-        req.user = user
-
-        next()
-        
-    } catch (error) {
-        return res.status(403).send({auth: false, error: "Unauthorized", message: 'Invalid token!'})
+    if (!token) {
+      return res.status(401).send({
+        auth: false,
+        error: "Unauthorized",
+        message: "No token provided.",
+      });
     }
-}
 
+    const data = jwt.verify(token, process.env.JWT_KEY);
+    const user_id = data.user_id;
 
-// Common function
+    const user = await Users.findById(user_id).select("-password");
 
-const encryptData = (data) => {
-    return aes256.encrypt(process.env.AES256_KEY, data)
-}
+    if (!user) {
+      return res.status(403).send({
+        auth: false,
+        error: "Unauthorized",
+        message: "Access token expired!",
+      });
+    }
 
-const decryptData = (data) => {
-    return aes256.decrypt(process.env.AES256_KEY, data)
-}
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Error during JWT verification:", error);
+    return res
+      .status(403)
+      .send({ auth: false, error: "Unauthorized", message: "Invalid token!" });
+  }
+};
 
-module.exports = jwtVerify
+const encryptData = (data) => aes256.encrypt(process.env.AES256_KEY, data);
+
+const decryptData = (data) => aes256.decrypt(process.env.AES256_KEY, data);
+
+module.exports = jwtVerify;

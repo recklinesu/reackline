@@ -1,2 +1,31 @@
-node_modules
-.env
+# Node.js
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Dependency directories
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Debug
+debug.log
+debug/
+
+# Test directory
+__tests__
+test
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# User-specific files
+npm-debug.log
