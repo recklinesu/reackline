@@ -19,7 +19,8 @@ const jwtVerify = async (req, res, next) => {
     const data = jwt.verify(token, process.env.JWT_KEY);
     const user_id = data.user_id;
 
-    const user = await Users.findById(user_id).select("-password");
+    const user = await Users.findById(user_id)
+    // .select("-password");
 
     if (!user) {
       return res.status(403).send({
