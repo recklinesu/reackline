@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const aes256 = require("aes256");
 const Users = require("../models/user");
 const jwtVerify = require("../middleware/jwtAuth");
+const domainCheck = require("../middleware/domainCheck");
 // const { roles } = require("../staticData/roles");
 require("dotenv").config();
 
@@ -183,7 +184,7 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
 });
 
 // update user's password route with JWT verification
-routes.post("/update-password", jwtVerify, [
+routes.post("/update-password", [domainCheck, jwtVerify], [
 
   body("currentPassword").custom(validatePasswordLength),
   body("newPassword").custom(validatePasswordLength),
