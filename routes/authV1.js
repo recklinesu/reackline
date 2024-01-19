@@ -111,7 +111,7 @@ routes.post(
 
 // Sign in route
 routes.post(
-  "/signin",
+  "/signin", [domainCheck],
   [
     body("password").custom(validatePasswordLength),
     body("userName").isString().notEmpty(),
