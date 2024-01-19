@@ -8,7 +8,15 @@ const routes = express.Router();
 
 routes.post("/create-domain", async (req, res) => {
   try {
-    const { title, host, color, logo, favIcon } = req.body;
+    const {
+      title,
+      host,
+      primaryColor,
+      secondaryColor,
+      backgroundColor,
+      logoUrl,
+      favIconUrl,
+    } = req.body;
 
     if (!title || !host) {
       return res.status(400).json({
@@ -20,9 +28,11 @@ routes.post("/create-domain", async (req, res) => {
     const newDomain = new Domain({
       title,
       host,
-      color: color || process.env.DEFAULT_COLOR,
-      logo: logo || process.env.DEFAULT_LOGO,
-      favIcon: favIcon || process.env.DEFAULT_FAV_ICON,
+      primaryColor: primaryColor || process.env.DEFAULT_COLOR,
+      secondaryColor: secondaryColor || process.env.DEFAULT_COLOR,
+      backgroundColor: backgroundColor || process.env.DEFAULT_COLOR,
+      logoUrl: logoUrl || process.env.DEFAULT_LOGO,
+      favIconUrl: favIconUrl || process.env.DEFAULT_FAV_ICON,
     });
 
     await newDomain.save();
@@ -30,14 +40,7 @@ routes.post("/create-domain", async (req, res) => {
     return res.status(201).json({
       status: true,
       message: "Domain created successfully",
-      domain: {
-        title: newDomain.title,
-        host: newDomain.host,
-        addedAt: newDomain.addedAt,
-        color: newDomain.color,
-        logo: newDomain.logo,
-        favIcon: newDomain.favIcon,
-      },
+      domain: newDomain,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -96,6 +99,36 @@ routes.get("/domain/:domain_id", async (req, res) => {
   }
 });
 
+routes.get("/domain/host/:host_name", async (req, res) => {
+  try {
+    const hostName = req.params.host_name;
+
+    if (!hostName) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid host name format",
+      });
+    }
+
+    const domain = await Domain.find({ host: hostName });
+
+    if (!domain) {
+      return res.status(404).json({
+        status: false,
+        message: "Domain not found",
+      });
+    }
+
+    return res.status(200).json(domain);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 routes.put("/update-domain/:domain_id", async (req, res) => {
   try {
     const domainId = req.params.domain_id;
@@ -107,16 +140,26 @@ routes.put("/update-domain/:domain_id", async (req, res) => {
       });
     }
 
-    const { title, host, color, logo, favIcon } = req.body;
+    const {
+      title,
+      host,
+      primaryColor,
+      secondaryColor,
+      backgroundColor,
+      logoUrl,
+      favIconUrl,
+    } = req.body;
 
     const updatedDomain = await Domain.findByIdAndUpdate(
       domainId,
       {
         title,
         host,
-        color: color || process.env.DEFAULT_COLOR,
-        logo: logo || process.env.DEFAULT_LOGO,
-        favIcon: favIcon || process.env.DEFAULT_FAV_ICON,
+        primaryColor,
+        secondaryColor,
+        backgroundColor,
+        logoUrl: logoUrl,
+        favIconUrl: favIconUrl,
       },
       { new: true } // Return the updated document
     );
@@ -128,16 +171,7 @@ routes.put("/update-domain/:domain_id", async (req, res) => {
       });
     }
 
-    const responseData = {
-      title: updatedDomain.title,
-      host: updatedDomain.host,
-      addedAt: updatedDomain.addedAt,
-      color: updatedDomain.color,
-      logo: updatedDomain.logo,
-      favIcon: updatedDomain.favIcon,
-    };
-
-    return res.status(200).json(responseData);
+    return res.status(200).json(updatedDomain);
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({

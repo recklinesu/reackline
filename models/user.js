@@ -1,15 +1,28 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  name: { type: String },
+  userName: { type: String, required: true },
+  commission: { type: Number, default: 0, required: true },
+  openingBalance: { type: Number, default: 0, required: true },
+  creditReference: { type: Number, default: 0, required: true },
+  mobile: { type: Number, required: true },
+  exposureLimit: { type: Number, default: 0, required: true },
   password: { type: String, required: true },
-  date: { type: Date, default: Date.now },
-  //   role: { type: String, required: true },
-  //   domain: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Domain",
-  //   },
+  createdAt: { type: Date, default: Date.now },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  role: {
+    type: String,
+    required: true,
+  },
+  domain: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Domain",
+    required: true,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

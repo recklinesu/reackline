@@ -1,10 +1,14 @@
 const express = require("express");
 const connectToMongo = require("./database");
-const authRoutes = require("./routes/auth");
+const cors = require("cors");
+
+const authRoutes = require("./routes/authV1");
 const domainRoutes = require("./routes/domain");
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.use(cors());
 
 app.use(express.json());
 

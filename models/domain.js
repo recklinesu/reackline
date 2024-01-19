@@ -5,9 +5,11 @@ const domainSchema = new mongoose.Schema({
   title: { type: String, required: true },
   host: { type: String, required: true, unique: true },
   addedAt: { type: Date, default: Date.now },
-  color: { type: String, default: process.env.DEFAULT_COLOR },
-  logo: { type: String, default: process.env.DEFAULT_LOGO },
-  favIcon: { type: String, default: process.env.DEFAULT_FAV_ICON },
+  primaryColor: { type: String, default: process.env.DEFAULT_COLOR },
+  secondaryColor: { type: String, default: process.env.DEFAULT_COLOR },
+  backgroundColor: { type: String, default: process.env.DEFAULT_COLOR },
+  logoUrl: { type: String, default: process.env.DEFAULT_LOGO },
+  favIconUrl: { type: String, default: process.env.DEFAULT_FAV_ICON },
 });
 
 const Domain = mongoose.model("Domain", domainSchema);

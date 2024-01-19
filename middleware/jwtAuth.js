@@ -6,7 +6,7 @@ require("dotenv").config();
 
 const jwtVerify = async (req, res, next) => {
   try {
-    const token = decryptData(req.headers["user-token"]);
+    const token = req.headers["user-token"];
 
     if (!token) {
       return res.status(401).send({
