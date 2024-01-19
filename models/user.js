@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema({
     ref: "Domain",
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+    default: "active",
+    enum: ["active", "suspend", "locked"],
+  },
 });
 
 const User = mongoose.model("User", userSchema);
