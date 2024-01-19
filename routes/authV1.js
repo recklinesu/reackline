@@ -19,14 +19,22 @@ const validateUserNameExists = async (value) => {
 };
 
 // Validation middleware for password length
-const validatePasswordLength = (value) => {
+const validatePasswordLength = (value,name) => {
   if (!value) {
-    throw new Error("Password cannot be empty.");
+    throw new Error("The "+name.path+" cannot be empty.");
   } else if (value.length < 6) {
-    throw new Error("The password must contain at least six characters.");
+    throw new Error("The "+name.path+" must contain at least six characters.");
   }
   return true;
 };
+
+const validatePasswordMatch = (value, data) =>{
+  if(!value){
+      throw new Error ("The "+data.path+" cannot be empty")    
+  }else if (value !== data.req.body.newPassword) {
+      throw new Error ("The "+data.path+" doesn't match with newPassword.")
+  } else return true;
+}
 
 // Sign up route
 routes.post(
@@ -144,10 +152,8 @@ routes.post(
 
       const userToken = jwt.sign(userData, process.env.JWT_KEY);
 
-      const newuser = await Users.findOne(
-        { userName: req.body.userName },
-        { password: 0 } // Exclude the password field
-      );
+      const newuser = await Users.findOne({ userName: req.body.userName }).select("-password");
+
       return res.status(200).json({
         status: true,
         message: "User has been logged in successfully!",
@@ -166,7 +172,7 @@ routes.post(
 
 // Get users route with JWT verification
 routes.get("/get-users", jwtVerify, async (req, res) => {
-  console.log("Helllo ============>", req.user, req);
+  // console.log("Helllo ============>", req.user, req);
   const users = await Users.find({}, "-password"); // Exclude the password field from the response
 
   return res.status(200).json({
@@ -174,6 +180,51 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
     message: "Users retrieved successfully",
     users: users,
   });
+});
+
+// update user's password route with JWT verification
+routes.post("/update-password", jwtVerify, [
+
+  body("currentPassword").custom(validatePasswordLength),
+  body("newPassword").custom(validatePasswordLength),
+  body('confirmPassword').custom(validatePasswordMatch)
+
+], async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: false,
+      message: "Validation failed!",
+      errors: errors.array(),
+    });
+  }
+
+  const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
+
+  if (!isMatched) {
+    return res
+      .status(401)
+      .json({ status: false, message: "Invalid password!" });
+  }
+
+  const passwordSalt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
+
+  const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
+
+  if (!userUpdated) {
+    return res
+      .status(401)
+      .json({ status: false, message: "Something went wrong!" });
+  }
+
+  return res.status(200).json({
+    status: true,
+    message: req.user.userName+"'s password updated successfully"
+  });
+
 });
 
 // Common function for data encryption
