@@ -6,14 +6,14 @@ const domainCheck = async (req, res, next) => {
         const host = req.headers["d"];
         const hostDetails = await Domains.findOne({host: host})
         if(!hostDetails){
-            return res.status(401).json({message:"Invalid Domain"});
+            return res.status(401).json({ status: false, error: "Unauthorized", message: "Invalid domain!" });
         }
         next()
          
     } catch (error) {
         return res
         .status(403)
-        .send({ auth: false, error: "Unauthorized", message: "Invalid host!" });
+        .send({ status: false, error: "Unauthorized", message: "Invalid host!" });
     }
 }
 

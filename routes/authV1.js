@@ -139,6 +139,13 @@ routes.post(
         });
       }
 
+      if (user.status !== "active") {
+        return res.status(401).json({
+          status: false,
+          message: "This user's profile is "+user.status,
+        });
+      }
+
       const isMatched = await bcrypt.compare(req.body.password, user.password);
 
       if (!isMatched) {
@@ -223,7 +230,45 @@ routes.post("/update-password", [domainCheck, jwtVerify], [
 
   return res.status(200).json({
     status: true,
-    message: req.user.userName+"'s password updated successfully"
+    message: req.user.userName+"'s password has been updated successfully"
+  });
+
+});
+
+// update user's status route with JWT verification
+routes.post("/update-users-status", [domainCheck, jwtVerify], [
+
+  body("status").custom(value=>{
+    if(value === "active" || value === "suspend" || value === "locked"){
+      return true;
+    }else{
+      throw new Error("The status could be either 'active', 'suspend' or 'locked'");
+    }
+  })
+
+], async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: false,
+      message: "Validation failed!",
+      errors: errors.array(),
+    });
+  }
+
+  const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {status: req.body.status})
+
+  if (!userUpdated) {
+    return res
+      .status(401)
+      .json({ status: false, message: "Something went wrong!" });
+  }
+
+  return res.status(200).json({
+    status: true,
+    message: req.user.userName+"'s status has been updated successfully"
   });
 
 });
