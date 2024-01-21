@@ -4,8 +4,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const aes256 = require("aes256");
 const Users = require("../models/user");
+const PassowordHistory = require("../models/passwordHistory")
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
+const { log } = require("console");
 // const { roles } = require("../staticData/roles");
 require("dotenv").config();
 
@@ -191,7 +193,7 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
 });
 
 // update user's password route with JWT verification
-routes.post("/update-password", [domainCheck, jwtVerify], [
+routes.post("/update-password", [jwtVerify], [
 
   body("currentPassword").custom(validatePasswordLength),
   body("newPassword").custom(validatePasswordLength),
@@ -209,34 +211,45 @@ routes.post("/update-password", [domainCheck, jwtVerify], [
     });
   }
 
-  const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
+  try {
+    const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
 
-  if (!isMatched) {
-    return res
-      .status(401)
-      .json({ status: false, message: "Invalid password!" });
+    if (!isMatched) {
+      return res
+        .status(401)
+        .json({ status: false, message: "Invalid password!" });
+    }
+
+    const passwordSalt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
+
+    const userPasswordUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
+
+    if (!userPasswordUpdated) {
+      return res
+        .status(401)
+        .json({ status: false, message: "Something went wrong!" });
+    }
+
+    if(!updateHistoryOfPassword(req.user._id, req.user._id)){
+      console.log(`Failed to add history of the updated password for ${req.userName}`)
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: req.user.userName+"'s password has been updated successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
-
-  const passwordSalt = bcrypt.genSaltSync(10);
-  const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
-
-  const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
-
-  if (!userUpdated) {
-    return res
-      .status(401)
-      .json({ status: false, message: "Something went wrong!" });
-  }
-
-  return res.status(200).json({
-    status: true,
-    message: req.user.userName+"'s password has been updated successfully"
-  });
 
 });
 
 // update user's status route with JWT verification
-routes.post("/update-users-status", [domainCheck, jwtVerify], [
+routes.post("/update-users-status", [jwtVerify], [
 
   body("status").custom(value=>{
     if(value === "active" || value === "suspend" || value === "locked"){
@@ -258,22 +271,122 @@ routes.post("/update-users-status", [domainCheck, jwtVerify], [
     });
   }
 
-  const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {status: req.body.status})
+  try {
+    const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {status: req.body.status})
 
-  if (!userUpdated) {
-    return res
-      .status(401)
-      .json({ status: false, message: "Something went wrong!" });
+    if (!userUpdated) {
+      return res
+        .status(401)
+        .json({ status: false, message: "Something went wrong!" });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: req.user.userName+"'s status has been updated successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
   }
-
-  return res.status(200).json({
-    status: true,
-    message: req.user.userName+"'s status has been updated successfully"
-  });
 
 });
 
+// get password update history route with JWT verification
+routes.get("/get-password-update-history/:page?/:pageSize?", [jwtVerify] , async (req, res) => {
+  try {
+
+    const page = (req.params.page)?((parseInt(req.params.page) < 1)?1:parseInt(req.params.page)):1;
+    const pageSize = (req.params.pageSize)?parseInt(req.params.pageSize):10;
+
+    const totalDocuments = await PassowordHistory.countDocuments({updatedOf:req.user._id});
+
+    const remainingPages = Math.ceil((totalDocuments - (page - 1) * pageSize) / pageSize);
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const userPassUpdateHistroy = await PassowordHistory.aggregate([
+      {
+        $match:{
+          updatedOf:req.user._id
+        }
+      },
+      {
+        $lookup:{
+          from:"users",
+          localField: 'updatedBy',
+          foreignField: '_id',
+          as: "userDetailsBy",
+        }
+      },
+      {
+        $lookup:{
+          from:"users",
+          localField: 'updatedOf',
+          foreignField: '_id',
+          as: "userDetailsOf",
+        }
+      },
+      {
+        $project: {
+          createdAt: "$createdAT",
+          updatedOf: "$userDetailsOf.userName",
+          updatedBy: "$userDetailsBy.userName",
+          _id:0
+        },
+      },
+      {
+        $skip: (page - 1) * pageSize,
+      },
+      {
+        $limit: pageSize,
+      },
+    ])
+
+    if (!userPassUpdateHistroy) {
+      return res
+        .status(200)
+        .json({ status: true, message: "No data found!" });
+    }
+
+
+    return res.status(200).json({
+        status :true,
+        currentPage:page,
+        pageSize:pageSize,
+        remainingPages: remainingPages,
+        totalPages: totalPages,
+        pageItems:userPassUpdateHistroy,
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error"+error,
+    });
+  }
+});
+
+
+// Common functions
+// ------------------------------------------------------------
+
+
 // Common function for data encryption
 const encryptData = (data) => aes256.encrypt(process.env.AES256_KEY, data);
+
+// Log password update history
+const updateHistoryOfPassword = async (updatedOf, updatedBy) =>{
+  try {
+    const passwordLog = new PassowordHistory;
+    passwordLog.updatedOf = updatedOf
+    passwordLog.updatedBy = updatedBy
+    passwordLog.save()
+    return true
+  } catch (error) {
+    return false
+  }
+}
 
 module.exports = routes;
