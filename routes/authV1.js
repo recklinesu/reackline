@@ -294,7 +294,7 @@ routes.post("/update-users-status", [jwtVerify], [
 });
 
 // get password update history route with JWT verification
-routes.get("/get-password-update-history/:page?/:pageSize?", [jwtVerify] , async (req, res) => {
+routes.get("/password-update-history/:page?/:pageSize?", [jwtVerify] , async (req, res) => {
   try {
 
     const page = (req.params.page)?((parseInt(req.params.page) < 1)?1:parseInt(req.params.page)):1;
