@@ -11,7 +11,7 @@ let passwordHistorySchemaModel = mongoose.model("passwordhistory", passwordHisto
 (async () => {
     try {
       await passwordHistorySchemaModel.createIndexes();
-      console.log("Indexes created successfully");
+      console.log("Password history created successfully \n ======================================>");
     } catch (error) {
       console.error("Error creating indexes:", error.message);
     }

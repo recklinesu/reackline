@@ -38,7 +38,7 @@ const User = mongoose.model("User", userSchema);
 (async () => {
   try {
     await User.createIndexes();
-    console.log("Indexes created successfully");
+    console.log("Users created successfully \n ======================================>");
   } catch (error) {
     console.error("Error creating indexes:", error.message);
   }

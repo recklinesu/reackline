@@ -17,7 +17,7 @@ const Domain = mongoose.model("Domain", domainSchema);
 (async () => {
   try {
     await Domain.createIndexes();
-    console.log("Indexes created successfully");
+    console.log("Site created successfully \n ======================================>");
   } catch (error) {
     console.error("Error creating indexes:", error.message);
   }

@@ -17,7 +17,7 @@ let roleSchemaModel = mongoose.model("roles", roleSchema);
 (async () => {
     try {
       await roleSchemaModel.createIndexes();
-      console.log("Indexes created successfully");
+      console.log("Roles created successfully \n ======================================>");
     } catch (error) {
       console.error("Error creating indexes:", error.message);
     }
