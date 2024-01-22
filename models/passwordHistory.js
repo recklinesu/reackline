@@ -8,6 +8,13 @@ const passwordHistorySchema = new mongoose.Schema({
 
 let passwordHistorySchemaModel = mongoose.model("passwordhistory", passwordHistorySchema)
 
-passwordHistorySchemaModel.createIndexes()
+(async () => {
+    try {
+      await passwordHistorySchemaModel.createIndexes();
+      console.log("Indexes created successfully");
+    } catch (error) {
+      console.error("Error creating indexes:", error.message);
+    }
+  })();
 
 module.exports = passwordHistorySchemaModel

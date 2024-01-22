@@ -14,6 +14,13 @@ const roleSchema = new mongoose.Schema({
 
 let roleSchemaModel = mongoose.model("roles", roleSchema);
 
-roleSchemaModel.createIndexes();
+(async () => {
+    try {
+      await roleSchemaModel.createIndexes();
+      console.log("Indexes created successfully");
+    } catch (error) {
+      console.error("Error creating indexes:", error.message);
+    }
+  })();
 
 module.exports = roleSchemaModel
