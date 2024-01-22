@@ -6,7 +6,7 @@ const passwordHistorySchema = new mongoose.Schema({
     createdAT: {type: Date, default: Date.now}
 })
 
-let passwordHistorySchemaModel = mongoose.model("passwordhistory", passwordHistorySchema)
+let passwordHistorySchemaModel = mongoose.model("passwordhistory", passwordHistorySchema);
 
 (async () => {
     try {
