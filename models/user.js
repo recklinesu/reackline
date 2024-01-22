@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: true
   },
   role: {
     type: mongoose.Schema.Types.ObjectId,
