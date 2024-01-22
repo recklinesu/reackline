@@ -7,7 +7,6 @@ const Users = require("../models/user");
 const PassowordHistory = require("../models/passwordHistory")
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
-const { log } = require("console");
 // const { roles } = require("../staticData/roles");
 require("dotenv").config();
 
