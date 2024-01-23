@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const aes256 = require("aes256");
 const Users = require("../models/user");
 const PassowordHistory = require("../models/passwordHistory")
+const Roles = require("../models/roles")
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck")
@@ -40,6 +41,13 @@ const validatePasswordMatch = (value, data) =>{
   } else return true;
 }
 
+const validateRolelExists = async (value) => {
+  const existsRole = await Roles.findById(new mongoose.Types.ObjectId(value));
+  if (!existsRole) {
+    throw new Error("Invalid role Id");
+  }
+};
+
 // Sign up route
 routes.post(
   "/signup", [jwtVerify],
@@ -52,7 +60,7 @@ routes.post(
     body("mobile").isNumeric(),
     body("exposureLimit").isNumeric(),
     body("password").isString().notEmpty().custom(validatePasswordLength),
-    body("role").isString().notEmpty(),
+    body("role").custom(validateRolelExists),
     body("domain").isString().notEmpty(),
   ],
   async (req, res) => {
@@ -282,7 +290,7 @@ routes.post("/update-password/:userId?", [jwtVerify], [
 });
 
 // update user's status route with JWT verification
-routes.post("/update-users-status", [jwtVerify], [
+routes.post("/update-users-status/:userId?", [jwtVerify], [
 
   body("status").custom(value=>{
     if(value === "active" || value === "suspend" || value === "locked"){
@@ -305,7 +313,27 @@ routes.post("/update-users-status", [jwtVerify], [
   }
 
   try {
-    const userUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {status: req.body.status})
+
+    let userId = req.params.userId
+
+    if(userId){
+      let checkPermission = await PermissionCheck(req.user._id, userId)
+
+      if(!checkPermission){
+        return res.status(401).json({
+          status: false,
+          message: "You don't have permission to perform this action"
+        })
+      }
+    }
+    
+    let userUpdated = null
+
+    if(userId){
+      userUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(userId)}, {status: req.body.status})
+    }else{
+      userUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.user._id)}, {status: req.body.status})
+    }
 
     if (!userUpdated) {
       return res
@@ -315,12 +343,94 @@ routes.post("/update-users-status", [jwtVerify], [
 
     return res.status(200).json({
       status: true,
-      message: req.user.userName+"'s status has been updated successfully"
+      message: "Status has been updated successfully"
     });
+
   } catch (error) {
     return res.status(500).json({
       status: false,
       message: "Internal server error",
+    });
+  }
+
+});
+
+// update users route with JWT verification
+routes.post("/update-user/:userId?", [
+  body("name").isLength({min :3}).optional().withMessage("Please provide a valid name"),
+  body("commission").optional().isNumeric().withMessage("Commission can be only typeOf numeric value"),
+  body("openingBalance").optional().isNumeric().withMessage("Commission can be only typeOf numeric value"),
+  body("creditReference").optional().isNumeric().withMessage("Commission can be only typeOf numeric value"),
+  body("exposureLimit").optional().isNumeric().withMessage("Commission can be only typeOf numeric value"),
+  body("mobile").optional().isNumeric().isLength({min: 10}).withMessage("Commission can be only typeOf numeric value"),
+  body("role").optional().custom(validateRolelExists),
+  body("status").optional().custom(value=>{
+    if(value === "active" || value === "suspend" || value === "locked"){
+      return true;
+    }else{
+      throw new Error("The status could be either 'active', 'suspend' or 'locked'");
+    }
+  })
+
+],[jwtVerify], async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: false,
+      message: "Validation failed!",
+      errors: errors.array(),
+    });
+  }
+
+  try {
+    
+    const body = {
+      name: req.body.name,
+      commission: req.body.commission,
+      openingBalance: req.body.openingBalance,
+      creditReference: req.body.creditReference,
+      mobile: req.body.mobile,
+      exposureLimit: req.body.exposureLimit,
+      role: req.body.role,
+      status: req.body.status,
+    }
+
+    if(req.params.userId){
+      const checkPermission = await PermissionCheck(req.user._id, req.params.userId)
+      if(!checkPermission){
+        return res.status(401).json({
+          status: false,
+          message: "You don't have permission to perform this action!",
+        })
+      }
+    }
+
+    let updatedUserDetails = null
+
+    if(req.params.userId){
+      updatedUserDetails = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), body)
+    }else{
+      updatedUserDetails = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user_id), body)
+    }
+
+    if(!updatedUserDetails){
+      return res.status(400).json({
+        status: false,
+        message: "somthing went wring",
+      });
+    }
+    
+    return res.status(500).json({
+      status: true,
+      message: "User details has been updated successfully!",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error"+error,
     });
   }
 
