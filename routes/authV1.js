@@ -103,8 +103,8 @@ routes.post(
         exposureLimit,
         password: hashedPassword,
         role,
-        domain,
-        createdBy: "659dbc4d05202eb8b2562f21", // make it dynamic
+        domain: req.user.domain,
+        createdBy: req.user._id, 
       });
 
       return res.status(200).json({
