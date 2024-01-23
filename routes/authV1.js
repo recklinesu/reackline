@@ -103,7 +103,7 @@ routes.post(
         exposureLimit,
         password: hashedPassword,
         role,
-        domain: req.user.domain,
+        domain,
         createdBy: req.user._id, 
       });
 
