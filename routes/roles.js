@@ -56,7 +56,7 @@ routes.post("/create-new-role", jwtVerify,[
 
 });
 
-routes.get("/get-roles", jwtVerify,async (req, res) =>{
+routes.get("/get-roles/:roleName?", jwtVerify,async (req, res) =>{
     try {
 
         if(!req.user.rolePermissions[0].canWatcher){
@@ -66,7 +66,21 @@ routes.get("/get-roles", jwtVerify,async (req, res) =>{
             });
         }
 
-        const roles = await Roles.find();
+        let roles = null
+
+        if(req.params.roleName){
+            roles = await Roles.find({name: req.params.roleName});
+        }else{
+            roles = await Roles.find();
+        }
+
+        if(!roles){
+            return res.status(404).json({
+                status:false,
+                message:"No data found."
+            })
+        }
+
 
         return res.status(200).json({
             status: true,
