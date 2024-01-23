@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose")
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -224,32 +225,37 @@ routes.post("/update-password/:userId?", [jwtVerify], [
 
   try {
 
+    let userId = req.params.userId
+
     if(userId){
-      let userId = req.params.userId;
+      let checkPermission = await PermissionCheck(req.user._id, userId)
 
-      const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
-  
-      if (!isMatched) {
-        return res
-          .status(401)
-          .json({ status: false, message: "Invalid password!" });
+      if(!checkPermission){
+        return res.status(401).json({
+          status: false,
+          message: "You don't have permission to perform this action"
+        })
       }
-
-    }else{
-      const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
-  
-      if (!isMatched) {
-        return res
-          .status(401)
-          .json({ status: false, message: "Invalid password!" });
-      }
-  
-      const passwordSalt = bcrypt.genSaltSync(10);
-      const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
-  
-      const userPasswordUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
     }
 
+    const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
+
+    if (!isMatched) {
+      return res
+        .status(401)
+        .json({ status: false, message: "Invalid password!" });
+    }
+
+    const passwordSalt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
+
+    let userPasswordUpdated = null
+
+    if(userId){
+      userPasswordUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(userId)}, {password: hashedPassword})
+    }else{
+      userPasswordUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.user._id)}, {password: hashedPassword})
+    }
 
     if (!userPasswordUpdated) {
       return res
@@ -263,12 +269,13 @@ routes.post("/update-password/:userId?", [jwtVerify], [
 
     return res.status(200).json({
       status: true,
-      message: req.user.userName+"'s password has been updated successfully"
+      message: "Password has been updated successfully",
     });
+    
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: "Internal server error",
+      message: "Internal server error"+error,
     });
   }
 
