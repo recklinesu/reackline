@@ -1,4 +1,5 @@
 const express = require("express");
+const UserDetails = require("../GlobalFunctions/userDetails")
 const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken");
 const Users = require("../models/user");
@@ -20,22 +21,7 @@ const jwtVerify = async (req, res, next) => {
     const data = jwt.verify(token, process.env.JWT_KEY);
     const user_id = data.user_id;
 
-    const user = await Users.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(user_id)
-        }
-      },
-      {
-        $lookup:{
-          from:"roles",
-          localField: 'role',
-          foreignField: '_id',
-          as: "rolePermissions",
-        }
-      },
-    ])
-    // .select("-password");
+    const user = await UserDetails(user_id)
 
     if (!user) {
       return res.status(403).send({
@@ -45,8 +31,10 @@ const jwtVerify = async (req, res, next) => {
       });
     }
 
-    req.user = user[0];
+    req.user = user;
+
     next();
+  
   } catch (error) {
     console.error("Error during JWT verification:", error);
     return res

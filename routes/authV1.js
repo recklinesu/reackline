@@ -7,7 +7,7 @@ const Users = require("../models/user");
 const PassowordHistory = require("../models/passwordHistory")
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
-// const { roles } = require("../staticData/roles");
+const PermissionCheck = require("../GlobalFunctions/permissioncheck")
 require("dotenv").config();
 
 const routes = express.Router();
@@ -40,7 +40,7 @@ const validatePasswordMatch = (value, data) =>{
 
 // Sign up route
 routes.post(
-  "/signup",
+  "/signup", [jwtVerify],
   [
     body("name").isString(),
     body("userName").isString().notEmpty().custom(validateUserNameExists),
@@ -54,8 +54,9 @@ routes.post(
     body("domain").isString().notEmpty(),
   ],
   async (req, res) => {
-    console.log(req.headers.host);
+
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
@@ -65,6 +66,7 @@ routes.post(
     }
 
     try {
+
       const {
         name,
         userName,
@@ -77,6 +79,8 @@ routes.post(
         role,
         domain,
       } = req.body;
+
+      // res.send(permissionCheckup);
 
       const passwordSalt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, passwordSalt);
@@ -192,7 +196,7 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
 });
 
 // update user's password route with JWT verification
-routes.post("/update-password", [jwtVerify], [
+routes.post("/update-password/:userId?", [jwtVerify], [
 
   body("currentPassword").custom(validatePasswordLength),
   body("newPassword").custom(validatePasswordLength),
@@ -211,18 +215,33 @@ routes.post("/update-password", [jwtVerify], [
   }
 
   try {
-    const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
 
-    if (!isMatched) {
-      return res
-        .status(401)
-        .json({ status: false, message: "Invalid password!" });
+    if(userId){
+      let userId = req.params.userId;
+
+      const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
+  
+      if (!isMatched) {
+        return res
+          .status(401)
+          .json({ status: false, message: "Invalid password!" });
+      }
+
+    }else{
+      const isMatched = await bcrypt.compare(req.body.currentPassword, req.user.password);
+  
+      if (!isMatched) {
+        return res
+          .status(401)
+          .json({ status: false, message: "Invalid password!" });
+      }
+  
+      const passwordSalt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
+  
+      const userPasswordUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
     }
 
-    const passwordSalt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(req.body.confirmPassword, passwordSalt);
-
-    const userPasswordUpdated = await Users.findOneAndUpdate({userName: req.user.userName, domain: req.user.domain}, {password: hashedPassword})
 
     if (!userPasswordUpdated) {
       return res
