@@ -8,6 +8,7 @@ const PassowordHistory = require("../models/passwordHistory")
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck")
+const CanCreate = require("../GlobalFunctions/canCreate")
 require("dotenv").config();
 
 const routes = express.Router();
@@ -67,6 +68,15 @@ routes.post(
 
     try {
 
+      let userCreatPermission = await CanCreate(req.user._id, req.body.role)
+
+      if(!userCreatPermission){
+        return res.status(401).send({
+          status: false,
+          message: "You can't create this user, Not allowed!"
+        })
+      }
+
       const {
         name,
         userName,
@@ -79,8 +89,6 @@ routes.post(
         role,
         domain,
       } = req.body;
-
-      // res.send(permissionCheckup);
 
       const passwordSalt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, passwordSalt);
