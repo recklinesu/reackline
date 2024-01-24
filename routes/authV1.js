@@ -271,8 +271,14 @@ routes.post("/update-password/:userId?", [jwtVerify], [
         .json({ status: false, message: "Something went wrong!" });
     }
 
-    if(!updateHistoryOfPassword(req.user._id, req.user._id)){
-      console.log(`Failed to add history of the updated password for ${req.userName}`)
+    if(userId){
+      if(!updateHistoryOfPassword(userId, req.user._id)){
+        console.log(`Failed to add history of the updated password for ${req.userName}`)
+      }
+    }else{
+      if(!updateHistoryOfPassword(req.user._id, req.user._id)){
+        console.log(`Failed to add history of the updated password for ${req.userName}`)
+      }
     }
 
     return res.status(200).json({
@@ -284,72 +290,6 @@ routes.post("/update-password/:userId?", [jwtVerify], [
     return res.status(500).json({
       status: false,
       message: "Internal server error"+error,
-    });
-  }
-
-});
-
-// update user's status route with JWT verification
-routes.post("/update-users-status/:userId?", [jwtVerify], [
-
-  body("status").custom(value=>{
-    if(value === "active" || value === "suspend" || value === "locked"){
-      return true;
-    }else{
-      throw new Error("The status could be either 'active', 'suspend' or 'locked'");
-    }
-  })
-
-], async (req, res) => {
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      status: false,
-      message: "Validation failed!",
-      errors: errors.array(),
-    });
-  }
-
-  try {
-
-    let userId = req.params.userId
-
-    if(userId){
-      let checkPermission = await PermissionCheck(req.user._id, userId)
-
-      if(!checkPermission){
-        return res.status(401).json({
-          status: false,
-          message: "You don't have permission to perform this action"
-        })
-      }
-    }
-    
-    let userUpdated = null
-
-    if(userId){
-      userUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(userId)}, {status: req.body.status})
-    }else{
-      userUpdated = await Users.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.user._id)}, {status: req.body.status})
-    }
-
-    if (!userUpdated) {
-      return res
-        .status(401)
-        .json({ status: false, message: "Something went wrong!" });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Status has been updated successfully"
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error",
     });
   }
 
@@ -452,7 +392,7 @@ routes.get("/password-update-history/:page?/:pageSize?", [jwtVerify] , async (re
     const userPassUpdateHistroy = await PassowordHistory.aggregate([
       {
         $match:{
-          updatedOf:req.user._id
+          updatedOf:new mongoose.Types.ObjectId(req.user._id)
         }
       },
       {
