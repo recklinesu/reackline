@@ -427,7 +427,7 @@ routes.get("/password-update-history/:page?/:pageSize?", [jwtVerify] , async (re
       },
     ])
 
-    if (!userPassUpdateHistroy) {
+    if (!userPassUpdateHistroy.length) {
       return res
         .status(200)
         .json({ status: true, message: "No data found!" });
