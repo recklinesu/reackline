@@ -438,7 +438,7 @@ routes.get("/password-update-history/:page?/:pageSize?", [jwtVerify] , async (re
         status :true,
         currentPage:page,
         pageSize:pageSize,
-        remainingPages: remainingPages,
+        // remainingPages: remainingPages,
         totalPages: totalPages,
         pageItems:userPassUpdateHistroy,
     })
