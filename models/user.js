@@ -13,11 +13,11 @@ const userSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
   },
   role: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "roles",
+    ref: "Role",
     required: true,
   },
   domain: {
@@ -38,7 +38,9 @@ const User = mongoose.model("User", userSchema);
 (async () => {
   try {
     await User.createIndexes();
-    console.log("Users created successfully \n ======================================>");
+    console.log(
+      "Users created successfully \n ======================================>"
+    );
   } catch (error) {
     console.error("Error creating indexes:", error.message);
   }

@@ -1,26 +1,28 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const roleSchema = new mongoose.Schema({
-    name:{type: String, required: true, unique: true},
-    canWatcher:{type: Boolean, default: false},
-    canDeclare:{type: Boolean, default: false},
-    canCreater:{type: Boolean, default: false},
-    canWhiteLabel:{type: Boolean, default: false},
-    canSuper:{type: Boolean, default: false},
-    canMaster:{type: Boolean, default: false},
-    canAgent:{type: Boolean, default: false},
-    canUser:{type: Boolean, default: false},
-})
+  name: { type: String, required: true, unique: true },
+  canWatcher: { type: Boolean, default: false },
+  canDeclare: { type: Boolean, default: false },
+  canCreater: { type: Boolean, default: false },
+  canWhiteLabel: { type: Boolean, default: false },
+  canSuper: { type: Boolean, default: false },
+  canMaster: { type: Boolean, default: false },
+  canAgent: { type: Boolean, default: false },
+  canUser: { type: Boolean, default: false },
+});
 
-let roleSchemaModel = mongoose.model("roles", roleSchema);
+let Role = mongoose.model("Role", roleSchema);
 
 (async () => {
-    try {
-      await roleSchemaModel.createIndexes();
-      console.log("Roles created successfully \n ======================================>");
-    } catch (error) {
-      console.error("Error creating indexes:", error.message);
-    }
-  })();
+  try {
+    await Role.createIndexes();
+    console.log(
+      "Roles created successfully \n ======================================>"
+    );
+  } catch (error) {
+    console.error("Error creating indexes:", error.message);
+  }
+})();
 
-module.exports = roleSchemaModel
+module.exports = Role;
