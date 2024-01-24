@@ -10,6 +10,12 @@ const domainSchema = new mongoose.Schema({
   backgroundColor: { type: String, default: process.env.DEFAULT_COLOR },
   logoUrl: { type: String, default: process.env.DEFAULT_LOGO },
   favIconUrl: { type: String, default: process.env.DEFAULT_FAV_ICON },
+  status: {
+    type: String,
+    required: true,
+    default: "active",
+    enum: ["active", "suspend"],
+  },
 });
 
 const Domain = mongoose.model("Domain", domainSchema);
