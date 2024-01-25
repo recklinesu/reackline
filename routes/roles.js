@@ -2,6 +2,7 @@ const express = require("express")
 const { body, validationResult } = require("express-validator");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
+const routePermissions = require("../GlobalFunctions/routePermission");
 require("dotenv").config();
 
 const routes = express.Router();
@@ -56,15 +57,17 @@ routes.post("/create-new-role", jwtVerify,[
 
 });
 
-routes.get("/get-roles/:roleName?", jwtVerify,async (req, res) =>{
+routes.get("/get-roles/:roleName?", jwtVerify, async (req, res) =>{
     try {
 
-        if(!req.user.rolePermissions[0].canWatcher){
-            return res.status(500).json({
-                status: false,
-                message: "This user is not allowed for the following task.",
-            });
-        }
+        // const allowedRolesList = await routePermissions(req.user._id,["Watcher","Declare","Declare","WhiteLabel","Super","Master","Agent","User"]);
+
+        // if(!allowedRolesList){
+        //     return res.status(500).json({
+        //         status: false,
+        //         message: "This user is not allowed for the following task.",
+        //     });
+        // }
 
         let roles = null
 
