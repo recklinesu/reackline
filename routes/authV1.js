@@ -216,6 +216,31 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
   });
 });
 
+// Get users by status
+routes.get("/users/:status", jwtVerify, async (req, res) => {
+  const { status } = req.params;
+  const { d } = req.headers;
+
+  try {
+    let query = { domain: d };
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (req.query.status) {
+      const statusArray = req.query.status.split(",");
+      query.status = { $in: statusArray };
+    }
+
+    const users = await Users.find(query);
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users by status:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // update user's password route with JWT verification
 routes.post(
   "/update-password/:userId?",
