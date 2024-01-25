@@ -10,6 +10,7 @@ const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck");
+const UserDetails = require("../GlobalFunctions/userDetails")
 const CanCreate = require("../GlobalFunctions/canCreate");
 require("dotenv").config();
 
@@ -152,8 +153,10 @@ routes.post(
     }
 
     try {
+
       let user = await Users.findOne({
         userName: req.body.userName,
+        domain: new mongoose.Types.ObjectId(req.domainId)
       });
 
       if (!user) {
@@ -184,15 +187,11 @@ routes.post(
 
       const userToken = jwt.sign(userData, process.env.JWT_KEY);
 
-      const newuser = await Users.findOne({ userName: req.body.userName })
-        .select("-password")
-        .populate("role");
-
       return res.status(200).json({
         status: true,
         message: "User has been logged in successfully!",
         userToken: userToken,
-        user: newuser,
+        user: await UserDetails(user._id),
       });
     } catch (error) {
       console.error("Error during user sign-in:", error);
