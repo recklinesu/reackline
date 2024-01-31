@@ -17,7 +17,7 @@ const domainRoutes = require("./routes/domain");
 const roleRoutes = require("./routes/roles");
 
 app.get("/", (req, res)=>{
-  res.send("Welcome to the API");
+  res.send("Welcome to the Reckline API");
 })
 
 app.use("/api", domainRoutes);
