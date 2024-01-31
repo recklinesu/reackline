@@ -16,9 +16,9 @@ const authRoutes = require("./routes/authV1");
 const domainRoutes = require("./routes/domain");
 const roleRoutes = require("./routes/roles");
 
-app.get("/", (req, res))=>{
-  res.send({message: "Welcome to the API"});
-}
+app.get("/", (req, res)=>{
+  res.send("Welcome to the API");
+})
 
 app.use("/api", domainRoutes);
 app.use("/api/auth", authRoutes);
