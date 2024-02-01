@@ -126,7 +126,7 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
     });
     }
     
-    const newDomain = await Domain.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.domainId), req.body)
+    const newDomain = await Domain.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.domainId), data)
 
     return res.status(200).json({
       status: true,
