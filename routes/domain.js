@@ -26,6 +26,15 @@ routes.post("/create-domain", [jwtVerify] , [
 
 ], async (req, res) => {
 
+  const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+  if(!routePermission){
+        return res.status(401).json({
+            status: false,
+            message: "This user is not allowed for the following task.",
+        });
+  }
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -47,15 +56,6 @@ routes.post("/create-domain", [jwtVerify] , [
       logoUrl,
       favIconUrl,
     } = req.body;
-
-    const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-    if(!routePermission){
-          return res.status(401).json({
-              status: false,
-              message: "This user is not allowed for the following task.",
-          });
-    }
     
     const newDomain = new Domain(req.body)
 
@@ -87,6 +87,15 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
 ], async (req, res) => {
 
+  const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+  if(!routePermission){
+        return res.status(401).json({
+            status: false,
+            message: "This user is not allowed for the following task.",
+        });
+  }
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -106,15 +115,6 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
       backgroundColor:req.body.backgroundColor,
       logoUrl:req.body.logoUrl,
       favIconUrl:req.body.favIconUrl,
-    }
-
-    const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-    if(!routePermission){
-          return res.status(401).json({
-              status: false,
-              message: "This user is not allowed for the following task.",
-          });
     }
 
     const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
@@ -146,6 +146,15 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
 routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
 
+  const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -157,15 +166,6 @@ routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
   }
 
   try {
-
-    const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-    if(!routePermission){
-          return res.status(401).json({
-              status: false,
-              message: "This user is not allowed for the following task.",
-          });
-    }
 
     const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
 
