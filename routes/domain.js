@@ -99,14 +99,14 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
   try {
 
-    const {
-      title,
-      primaryColor,
-      secondaryColor,
-      backgroundColor,
-      logoUrl,
-      favIconUrl,
-    } = req.body;
+    const data = {
+      title:req.body.title,
+      primaryColor:req.body.primaryColor,
+      secondaryColor:req.body.secondaryColor,
+      backgroundColor:req.body.backgroundColor,
+      logoUrl:req.body.logoUrl,
+      favIconUrl:req.body.favIconUrl,
+    }
 
     const routePermission = await routePermissions(req.user._id, ["Watcher"])
 
