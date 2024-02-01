@@ -196,7 +196,7 @@ routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
 
 routes.get("/domains", async (req, res) => {
   try {
-    const domains = await Domain.find();
+    const domains = await Domain.find(); 
 
     return res.status(200).json({
       status: true,
