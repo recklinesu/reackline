@@ -10,7 +10,7 @@ const routes = express.Router();
 
 routes.post("/create-domain", [jwtVerify] , [
   body("title").notEmpty().withMessage("title is required"),
-  body("host").custom(async(data, body)=>{
+  body("host").notEmpty().custom(async(data, body)=>{
     const domain = await Domain.findOne({host: body.req.body.host})
     if(domain){
       throw new Error("Domain already exists!");
@@ -21,8 +21,8 @@ routes.post("/create-domain", [jwtVerify] , [
   body("primaryColor").notEmpty().withMessage("primaryColor is required"),
   body("secondaryColor").notEmpty().withMessage("secondaryColor is required"),
   body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
-  body("logoUrl").isURL().withMessage("logoUrl is required"),
-  body("favIconUrl").isURL().withMessage("favIconUrl is required"),
+  body("logoUrl").notEmpty().withMessage("logoUrl is required"),
+  body("favIconUrl").notEmpty().withMessage("favIconUrl is required"),
 
 ], async (req, res) => {
 
