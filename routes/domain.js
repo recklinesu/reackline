@@ -10,7 +10,7 @@ const routes = express.Router();
 
 routes.post("/create-domain", [jwtVerify] , [
   body("title").notEmpty().withMessage("title is required"),
-  body("host").notEmpty().custom(async(data, body)=>{
+  body("host").notEmpty().withMessage("host is required").custom(async(data, body)=>{
     const domain = await Domain.findOne({host: body.req.body.host})
     if(domain){
       throw new Error("Domain already exists!");
