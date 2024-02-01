@@ -2,12 +2,42 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const Domain = require("../models/domain");
 const mongoose = require("mongoose");
+const jwtVerify = require("../middleware/jwtAuth");
+const routePermissions = require("../GlobalFunctions/routePermission");
 require("dotenv").config();
 
 const routes = express.Router();
 
-routes.post("/create-domain", async (req, res) => {
+routes.post("/create-domain", [jwtVerify] , [
+  body("title").notEmpty().withMessage("title is required"),
+  body("host").custom(async(data, body)=>{
+    const domain = await Domain.findOne({host: body.req.body.host})
+    if(domain){
+      throw new Error("Domain already exists!");
+    }else{
+      return true
+    }
+  }),
+  body("primaryColor").notEmpty().withMessage("primaryColor is required"),
+  body("secondaryColor").notEmpty().withMessage("secondaryColor is required"),
+  body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
+  body("logoUrl").isURL().withMessage("logoUrl is required"),
+  body("favIconUrl").isURL().withMessage("favIconUrl is required"),
+
+], async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
+      status: false,
+      message: "Validation failed!",
+      errors: errors.array(),
+      });
+  }
+
   try {
+
     const {
       title,
       host,
@@ -18,37 +48,150 @@ routes.post("/create-domain", async (req, res) => {
       favIconUrl,
     } = req.body;
 
-    if (!title || !host) {
-      return res.status(400).json({
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
+    
+    const newDomain = new Domain(req.body)
+
+    await newDomain.save()
+
+    return res.status(200).json({
+      status: true,
+      message: "Domain has been created successfully!",
+      domain: await Domain.findById(new mongoose.Types.ObjectId(newDomain._id)),
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
         status: false,
-        message: "Title and host are required fields",
+        message: "Internal server error : "+error,
       });
     }
 
-    const newDomain = new Domain({
-      title,
-      host,
-      primaryColor: primaryColor || process.env.DEFAULT_COLOR,
-      secondaryColor: secondaryColor || process.env.DEFAULT_COLOR,
-      backgroundColor: backgroundColor || process.env.DEFAULT_COLOR,
-      logoUrl: logoUrl || process.env.DEFAULT_LOGO,
-      favIconUrl: favIconUrl || process.env.DEFAULT_FAV_ICON,
-    });
+});
 
-    await newDomain.save();
+routes.post("/update-domain/:domainId", [jwtVerify] , [
+  body("title").notEmpty().withMessage("title is required"),
+  body("primaryColor").notEmpty().withMessage("primaryColor is required"),
+  body("secondaryColor").notEmpty().withMessage("secondaryColor is required"),
+  body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
+  body("logoUrl").isURL().withMessage("logoUrl is required"),
+  body("favIconUrl").isURL().withMessage("favIconUrl is required"),
 
-    return res.status(201).json({
-      status: true,
-      message: "Domain created successfully",
-      domain: newDomain,
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({
+], async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
       status: false,
-      message: "Internal server error",
-    });
+      message: "Validation failed!",
+      errors: errors.array(),
+      });
   }
+
+  try {
+
+    const {
+      title,
+      primaryColor,
+      secondaryColor,
+      backgroundColor,
+      logoUrl,
+      favIconUrl,
+    } = req.body;
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
+
+    const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
+
+    if(!checkDomain){
+      return res.status(401).json({
+        status: false,
+        message: "This domain does not exists!",
+    });
+    }
+    
+    const newDomain = await Domain.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.domainId), req.body)
+
+    return res.status(200).json({
+      status: true,
+      message: "Domain has been updated successfully!",
+      domain: await Domain.findById(new mongoose.Types.ObjectId(newDomain._id)),
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+        status: false,
+        message: "Internal server error : "+error,
+      });
+    }
+
+});
+
+routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
+      status: false,
+      message: "Validation failed!",
+      errors: errors.array(),
+      });
+  }
+
+  try {
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
+
+    const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
+
+    if(!checkDomain){
+      return res.status(401).json({
+        status: false,
+        message: "This domain does not exists!",
+    });
+    }
+    
+    const newDomain = await Domain.findByIdAndDelete(new mongoose.Types.ObjectId(req.params.domainId))
+
+    return res.status(200).json({
+      status: true,
+      message: "Domain has been deleted successfully!",
+      domain: await Domain.findById(new mongoose.Types.ObjectId(newDomain._id)),
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+        status: false,
+        message: "Internal server error : "+error,
+      });
+    }
+
 });
 
 routes.get("/domains", async (req, res) => {
