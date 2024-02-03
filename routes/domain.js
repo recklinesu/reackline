@@ -4,9 +4,23 @@ const Domain = require("../models/domain");
 const mongoose = require("mongoose");
 const jwtVerify = require("../middleware/jwtAuth");
 const routePermissions = require("../GlobalFunctions/routePermission");
+const masterCheck = require("../GlobalFunctions/masterCheck");
 require("dotenv").config();
 
 const routes = express.Router();
+
+
+// Validation middleware for password length
+const validatePasswordLength = (value, name) => {
+  if (!value) {
+    throw new Error("The " + name.path + " cannot be empty.");
+  } else if (value.length < 6) {
+    throw new Error(
+      "The " + name.path + " must contain at least six characters."
+    );
+  }
+  return true;
+};
 
 routes.post("/create-domain", [jwtVerify] , [
   body("title").notEmpty().withMessage("title is required"),
@@ -23,17 +37,9 @@ routes.post("/create-domain", [jwtVerify] , [
   body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
   body("logoUrl").notEmpty().withMessage("logoUrl is required"),
   body("favIconUrl").notEmpty().withMessage("favIconUrl is required"),
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
-
-  const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-  if(!routePermission){
-        return res.status(401).json({
-            status: false,
-            message: "This user is not allowed for the following task.",
-        });
-  }
 
   const errors = validationResult(req);
 
@@ -46,6 +52,24 @@ routes.post("/create-domain", [jwtVerify] , [
   }
 
   try {
+
+    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+    if(!masterChecked){
+      return res.status(401).send({
+        status: false,
+        message: "Invalid master password!",
+      });
+    }
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
 
     const {
       title,
