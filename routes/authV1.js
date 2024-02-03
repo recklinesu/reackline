@@ -12,6 +12,7 @@ const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck");
 const UserDetails = require("../GlobalFunctions/userDetails")
 const CanCreate = require("../GlobalFunctions/canCreate");
+const masterCheck = require("../GlobalFunctions/masterCheck");
 require("dotenv").config();
 
 const routes = express.Router();
@@ -66,6 +67,7 @@ routes.post(
     body("password").isString().notEmpty().custom(validatePasswordLength),
     body("role").custom(validateRolelExists),
     body("domain").isString().notEmpty(),
+    body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -79,6 +81,16 @@ routes.post(
     }
 
     try {
+
+      const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+      if(!masterChecked){
+        return res.status(401).send({
+          status: false,
+          message: "Invalid master password!",
+        });
+      }
+
       let userCreatPermission = await CanCreate(req.user._id, req.body.role);
 
       if (!userCreatPermission) {
@@ -127,7 +139,7 @@ routes.post(
       console.error("Error during user creation:", error);
       return res.status(500).json({
         status: false,
-        message: "Internal server error",
+        message: "Internal server error"+error,
       });
     }
   }
