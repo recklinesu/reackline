@@ -228,27 +228,120 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
 });
 
 // Get users by status
-routes.get("/users/:status", jwtVerify, async (req, res) => {
-  const { status } = req.params;
-  const { d } = req.headers;
+routes.get("/users-by-status/:status/:page/:pageSize", jwtVerify, async (req, res) => {
 
   try {
-    let query = { domain: d };
 
-    if (status) {
-      query.status = status;
+    const checkParams = (value)=>{
+      if (value === "active" || value === "suspend" || value === "locked") {
+        return true;
+      } else {
+        return false
+      }
     }
 
-    if (req.query.status) {
-      const statusArray = req.query.status.split(",");
-      query.status = { $in: statusArray };
+    if(!checkParams(req.params.status)){
+      return res.status(400).json({
+        status: false,
+        message: "The status could be either 'active', 'suspend' or 'locked'"
+      })
     }
 
-    const users = await Users.find(query);
-    res.json(users);
+    const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status});
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status}).skip((page - 1) * pageSize).limit(pageSize)
+
+    if(!users.length){
+      return res.status(200).json({
+        status: true,
+        message: "No data found!"
+      })
+    }else{
+      return res.status(200).json({
+        status: true,
+        message: "User's fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        // remainingPages: remainingPages,
+        totalPages: totalPages,
+        users
+      })
+    }
+
   } catch (error) {
-    console.error("Error fetching users by status:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
+// Get users by role
+routes.get("/users-by-role/:roleId/:page/:pageSize", jwtVerify, async (req, res) => {
+
+  try {
+
+    const checkRole = await Roles.findOne(new mongoose.Types.ObjectId(req.params.roleId))
+
+    if(!checkRole){
+      return res.status(400).json({
+        status: false,
+        message: "Invalid Role ID!"
+      })
+    }
+
+    const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)});
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)}).skip((page - 1) * pageSize).limit(pageSize)
+
+    if(!users.length){
+      return res.status(200).json({
+        status: true,
+        message: "No data found!"
+      })
+    }else{
+      return res.status(200).json({
+        status: true,
+        message: "User's fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        // remainingPages: remainingPages,
+        totalPages: totalPages,
+        users
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
   }
 });
 
@@ -391,6 +484,7 @@ routes.post(
           );
         }
       }),
+      body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
   ],
   [jwtVerify],
   async (req, res) => {
@@ -405,6 +499,16 @@ routes.post(
     }
 
     try {
+
+      const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+      if(!masterChecked){
+        return res.status(401).send({
+          status: false,
+          message: "Invalid master password!",
+        });
+      }
+      
       const body = {
         name: req.body.name,
         commission: req.body.commission,
