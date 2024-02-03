@@ -16,7 +16,7 @@ const userDetails = async (userId) =>{
             from:"roles",
             localField: 'role',
             foreignField: '_id',
-            as: "rolePermissions",
+            as: "role",
           }
         },
       ])

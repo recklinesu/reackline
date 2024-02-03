@@ -262,7 +262,7 @@ routes.get("/users-by-status/:status/:page/:pageSize", jwtVerify, async (req, re
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status}).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status}).populate(["role"]).skip((page - 1) * pageSize).limit(pageSize)
 
     if(!users.length){
       return res.status(200).json({
@@ -318,7 +318,7 @@ routes.get("/users-by-role/:roleId/:page/:pageSize", jwtVerify, async (req, res)
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)}).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)}).populate(["role"]).skip((page - 1) * pageSize).limit(pageSize)
 
     if(!users.length){
       return res.status(200).json({
@@ -508,7 +508,7 @@ routes.post(
           message: "Invalid master password!",
         });
       }
-      
+
       const body = {
         name: req.body.name,
         commission: req.body.commission,
