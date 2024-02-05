@@ -640,7 +640,7 @@ routes.get(
         currentPage: page,
         pageSize: pageSize,
         itemCount: userPassUpdateHistroy.length,
-        totalPages: userPassUpdateHistroy,
+        totalPages: totalPages,
         pageItems: userPassUpdateHistroy,
       });
     } catch (error) {
