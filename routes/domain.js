@@ -46,7 +46,7 @@ routes.post("/create-domain", [jwtVerify] , [
   if (!errors.isEmpty()) {
       return res.status(400).json({
       status: false,
-      message: "Validation failed!",
+      message: errors.array()[0]['msg'],
       errors: errors.array(),
       });
   }
@@ -125,7 +125,7 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
   if (!errors.isEmpty()) {
       return res.status(400).json({
       status: false,
-      message: "Validation failed!",
+      message: errors.array()[0]['msg'],
       errors: errors.array(),
       });
   }
@@ -184,7 +184,7 @@ routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
   if (!errors.isEmpty()) {
       return res.status(400).json({
       status: false,
-      message: "Validation failed!",
+      message: errors.array()[0]['msg'],
       errors: errors.array(),
       });
   }

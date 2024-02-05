@@ -75,7 +75,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: "Validation failed!",
+        message: errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -159,7 +159,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: "Validation failed!",
+        message: errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -228,7 +228,7 @@ routes.get("/get-users", jwtVerify, async (req, res) => {
 });
 
 // Get users by status
-routes.get("/users-by-status/:status/:page/:pageSize", jwtVerify, async (req, res) => {
+routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, res) => {
 
   try {
 
@@ -290,7 +290,7 @@ routes.get("/users-by-status/:status/:page/:pageSize", jwtVerify, async (req, re
 });
 
 // Get users by role
-routes.get("/users-by-role/:roleId/:page/:pageSize", jwtVerify, async (req, res) => {
+routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, res) => {
 
   try {
 
@@ -360,7 +360,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: "Validation failed!",
+        message: errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -493,7 +493,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: "Validation failed!",
+        message: errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
