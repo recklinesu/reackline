@@ -1,5 +1,5 @@
 const express = require("express")
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, check } = require("express-validator");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
 const routePermissions = require("../GlobalFunctions/routePermission");
@@ -8,7 +8,11 @@ require("dotenv").config();
 const routes = express.Router();
 
 routes.post("/create-new-role", jwtVerify,[
-    body("name").isLength({min:3}),
+    body("name").isLength({min:3}).custom(async (e)=>{
+        const role = await Roles.findOne({name: e})
+        console.log(role);
+        if (role) throw new Error('Role already exists');
+    }),
 ], async(req,res)=>{
 
     const errors = validationResult(req);
@@ -23,7 +27,9 @@ routes.post("/create-new-role", jwtVerify,[
 
     try {
 
-        if(!req.user.rolePermissions[0].canWatcher){
+        const checkPermission = await routePermissions(req.user._id, ["Watcher"])
+
+        if(!checkPermission){
             return res.status(500).json({
                 status: false,
                 message: "This user is not allowed for the following task.",
@@ -32,14 +38,14 @@ routes.post("/create-new-role", jwtVerify,[
         
         const roles = await Roles.create({
             name:req.body.name,
-            canWatcher:req.body.canWatcher,
-            canDeclare:req.body.canDeclare,
-            canCreater:req.body.canCreater,
-            canWhiteLabel:req.body.canWhiteLabel,
-            canSuper:req.body.canSuper,
-            canMaster:req.body.canMaster,
-            canAgent:req.body.canAgent,
-            canUser:req.body.canUser,
+            canWatcher:req.body.canWatcher??false,
+            canDeclare:req.body.canDeclare??false,
+            canCreater:req.body.canCreater??false,
+            canWhiteLabel:req.body.canWhiteLabel??false,
+            canSuper:req.body.canSuper??false,
+            canMaster:req.body.canMaster??false,
+            canAgent:req.body.canAgent??false,
+            canUser:req.body.canUser??false,
         })
 
         return res.status(200).json({
@@ -122,7 +128,9 @@ routes.post("/update-role-permissions", jwtVerify,[
 
     try {
 
-        if(!req.user.rolePermissions[0].canWatcher){
+        const checkPermission = await routePermissions(req.user._id, ["Watcher"])
+
+        if(!checkPermission){
             return res.status(500).json({
                 status: false,
                 message: "This user is not allowed for the following task.",

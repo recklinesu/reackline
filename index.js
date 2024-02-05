@@ -13,6 +13,7 @@ app.use(express.json());
 connectToMongo();
 
 const authRoutes = require("./routes/auth");
+const transactionRoutes = require("./routes/transit");
 const domainRoutes = require("./routes/domain");
 const roleRoutes = require("./routes/roles");
 
@@ -22,6 +23,7 @@ app.get("/", (req, res)=>{
 
 app.use("/api", domainRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/transit", transactionRoutes);
 app.use("/api/settings", roleRoutes);
 
 app.use((err, req, res, next) => {

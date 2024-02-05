@@ -14,7 +14,7 @@ const routePermissions = async (userId,allowedRolesList) => {
             return false
         }
         
-        const userPermission = user.rolePermissions[0].name
+        const userPermission = user.role[0].name
 
         if(allowedRolesList.includes(userPermission)){
             return true

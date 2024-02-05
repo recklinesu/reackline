@@ -12,7 +12,7 @@ const canCreate = async (userId, roleId) =>{
             return false
         }
 
-        const userPermissions = user.rolePermissions[0]
+        const userPermissions = user.role[0]
 
         checkPoint = null
 
