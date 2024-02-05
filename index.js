@@ -12,7 +12,7 @@ app.use(express.json());
 
 connectToMongo();
 
-const authRoutes = require("./routes/authV1");
+const authRoutes = require("./routes/auth");
 const domainRoutes = require("./routes/domain");
 const roleRoutes = require("./routes/roles");
 
