@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const transitSchema = new mongoose.Schema({
-  payee: {type: mongoose.Schema.Types.ObjectId, ref: "user",required:true},
-  payer: {type: mongoose.Schema.Types.ObjectId, ref: "user",required:true},
+  payee: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
+  payer: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   amount: { type: Number, default: 0, required: true },
   message: { type: String, required: false },
   status: {

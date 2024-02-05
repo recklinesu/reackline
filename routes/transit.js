@@ -174,11 +174,11 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
 routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
 
     body("filter").optional().custom((value) => {
-        if (value === "sent" || value === "recieved") {
+        if (value === "sent" || value === "received") {
           return true;
         } else {
           throw new Error(
-            "The status could be either 'sent', 'recieved'"
+            "The status could be either 'sent', 'received'"
           );
         }
     })
@@ -194,7 +194,54 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
       });
     }
     try {
-        res.send("hello")
+
+        const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+        
+        const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+        let filterCriteria = null;
+
+        if(req.body.filter){
+            filterCriteria = req.body.filter === "sent" ? { payer: req.user._id } : { payee: req.user._id };
+        }else{
+            filterCriteria = {
+                $or: [{ payee: req.user._id  }, { payer: req.user._id  }],
+            }
+        }
+
+        const totalDocuments = await Transactions.countDocuments(filterCriteria);
+
+        const remainingPages = Math.ceil(
+            (totalDocuments - (page - 1) * pageSize) / pageSize
+          );
+      
+        const totalPages = Math.ceil(totalDocuments / pageSize);
+
+
+        const transactions = await Transactions.find(filterCriteria)
+        .populate("payee", "userName name")
+        .populate("payer", "userName name").skip((page - 1) * pageSize).limit(pageSize);
+
+        if(!transactions.length){
+        return res.status(200).json({
+            status: true,
+            message: "No data found!"
+        })
+        }else{
+        return res.status(200).json({
+            status: true,
+            message: "Transactions fetched successfully.",
+            currentPage: page,
+            pageSize: pageSize,
+            itemCount: transactions.length,
+            totalPages: totalPages,
+            pageItems:transactions
+        })
+        }
 
     } catch (error) {
         return res.status(500).json({

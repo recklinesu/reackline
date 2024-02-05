@@ -272,12 +272,12 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
     }else{
       return res.status(200).json({
         status: true,
-        message: "User's fetched successfully!",
+        message: "Users fetched successfully!",
         currentPage: page,
         pageSize: pageSize,
-        // remainingPages: remainingPages,
+        itemCount: users.length,
         totalPages: totalPages,
-        users
+        pageItems:users
       })
     }
 
@@ -328,12 +328,12 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
     }else{
       return res.status(200).json({
         status: true,
-        message: "User's fetched successfully!",
+        message: "Users fetched successfully!",
         currentPage: page,
         pageSize: pageSize,
-        // remainingPages: remainingPages,
+        itemCount: users.length,
         totalPages: totalPages,
-        users
+        pageItems:users
       })
     }
 
@@ -636,10 +636,11 @@ routes.get(
 
       return res.status(200).json({
         status: true,
+        message: "Password histories fetched successfully!",
         currentPage: page,
         pageSize: pageSize,
-        // remainingPages: remainingPages,
-        totalPages: totalPages,
+        itemCount: userPassUpdateHistroy.length,
+        totalPages: userPassUpdateHistroy,
         pageItems: userPassUpdateHistroy,
       });
     } catch (error) {

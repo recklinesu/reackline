@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 
 const passwordHistorySchema = new mongoose.Schema({
-    updatedOf: {type: mongoose.Schema.Types.ObjectId, ref: "user",required:true},
-    updatedBy: {type: mongoose.Schema.Types.ObjectId, ref: "user",required:true},
+    updatedOf: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
+    updatedBy: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
     createdAT: {type: Date, default: Date.now}
 })
 
