@@ -5,6 +5,7 @@ const transitSchema = new mongoose.Schema({
   payee: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   payer: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   amount: { type: Number, default: 0, required: true },
+  remark: { type: String, required: false },
   message: { type: String, required: false },
   status: {
     type: String,

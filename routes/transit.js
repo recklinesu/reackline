@@ -37,6 +37,7 @@ const validatePasswordLength = (value, name) => {
 routes.post("/add-balance", [jwtVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
+    body("remark").optional().toString(),
     body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
@@ -61,6 +62,8 @@ routes.post("/add-balance", [jwtVerify], [
         if(!masterChecked){
             return res.status(401).send({ auth: false, message: "Invalid master password."})
         }
+
+        const remark = req.body.remark??null
         
         const money = parseInt(req.body.balance)
         
@@ -71,14 +74,14 @@ routes.post("/add-balance", [jwtVerify], [
         const moneyUpdate = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: newOpeningBalance})
 
         if(!moneyUpdate){
-            await transactionLog(req.user._id, req.user._id, money, "failed",  "Adding money in self account has been failed.")
+            await transactionLog(req.user._id, req.user._id, money, "failed",  "Adding money in self account has been failed.", remark)
             return res.status(400).json({
                 status: false,
                 message:"Somthing went wrong while updating wallet!"
             })
         }
 
-        await transactionLog(req.user._id, req.user._id, money, "success",  "Amount has been added in self account successfully!")
+        await transactionLog(req.user._id, req.user._id, money, "success",  "Amount has been added in self account successfully!", remark)
 
         return res.status(200).json({
             status: true,
@@ -97,6 +100,7 @@ routes.post("/add-balance", [jwtVerify], [
 routes.post("/transfer-balance/:userId", [jwtVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
+    body("remark").optional().toString(),
     body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
@@ -122,6 +126,8 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
             return res.status(401).send({ auth: false, message: "Invalid master password."})
         }
 
+        const const remark = req.body.remark??null = req.body.remark??null
+
         const balance = parseInt(req.body.balance)
 
         const payerOpeningBalance = parseInt(req.user.openingBalance)
@@ -131,7 +137,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
         const payeeBalance = parseInt(payeeDetails.openingBalance)
 
         if(payerOpeningBalance < balance){
-            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Insufficient Balance.")
+            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Insufficient Balance.", remark)
             return res.status(401).json({
                 status:false,
                 message:"You don't have insufficient balance in your wallet."
@@ -147,14 +153,14 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
         const updatedPayer =  await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: payerNewOpeningBalance})
 
         if(!updatedPayee || !updatedPayer){
-            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.")
+            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark)
             return res.status(401).json({
                 status:false,
                 message:"Somthing went wrong!"
             })
         }
 
-        await transactionLog(payeeDetails._id, req.user._id, balance, "success",  "Amount has been transfered successfully.")
+        await transactionLog(payeeDetails._id, req.user._id, balance, "success",  "Amount has been transfered successfully.", remark)
 
         return res.status(200).json({
             status: true,
@@ -253,14 +259,15 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
 
 
 
-const transactionLog = async (payee, payer, amount, status, message)=>{
+const transactionLog = async (payee, payer, amount, status, message, remark)=>{
     try {
         const logTransit = await Transactions.create({
             payee,
             payer,
             amount,
             message,
-            status
+            status,
+            remark
         });
     } catch (error) {
         console.log(error.message);
