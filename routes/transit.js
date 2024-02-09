@@ -126,7 +126,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
             return res.status(401).send({ auth: false, message: "Invalid master password."})
         }
 
-        const const remark = req.body.remark??null = req.body.remark??null
+        const remark = req.body.remark??null
 
         const balance = parseInt(req.body.balance)
 
