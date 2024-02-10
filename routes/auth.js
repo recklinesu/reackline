@@ -456,11 +456,11 @@ routes.post(
     body("name")
       .optional()
       .isLength({ min: 3 })
-      .toString()
+      .isString()
       .withMessage("Please provide a valid name"),
     body("currency")
       .optional()
-      .toString()
+      .isString()
       .withMessage("Please provide a valid currency"),
     body("commission")
       .optional()
