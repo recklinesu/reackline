@@ -37,7 +37,7 @@ const validatePasswordLength = (value, name) => {
 routes.post("/add-balance", [jwtVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
-    body("remark").optional().toString(),
+    body("remark").optional().isString(),
     body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
@@ -100,7 +100,7 @@ routes.post("/add-balance", [jwtVerify], [
 routes.post("/transfer-balance/:userId", [jwtVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
-    body("remark").optional().toString(),
+    body("remark").optional().isString(),
     body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
