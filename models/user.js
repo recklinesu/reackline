@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  name: { type: String },
+  name: { type: String, default: "Anonymous", required:false },
   userName: { type: String, required: true },
-  commission: { type: Number, default: 0, required: true },
-  openingBalance: { type: Number, default: 0, required: true },
-  creditReference: { type: Number, default: 0, required: true },
-  mobile: { type: Number, required: true },
-  exposureLimit: { type: Number, default: 0, required: true },
+  commission: { type: Number, default: 0, required: false },
+  openingBalance: { type: Number, default: 0, required: false },
+  creditReference: { type: Number, default: 0, required: false },
+  partnership: { type: Number, default: 0, required: false },
+  currency: { type: String, default: "INR", required: false },
+  mobile: { type: Number, mobile: null,required: false },
+  exposureLimit: { type: Number, default: 0, required: false },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   createdBy: {
@@ -27,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    required: true,
+    required: false,
     default: "active",
     enum: ["active", "suspend", "locked"],
   },

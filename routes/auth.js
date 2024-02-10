@@ -57,13 +57,15 @@ routes.post(
   "/signup",
   [jwtVerify],
   [
-    body("name").isString(),
+    body("name").optional().isString(),
+    body("currency").optional().isString(),
     body("userName").isString().notEmpty().custom(validateUserNameExists),
-    body("commission").isNumeric(),
-    body("openingBalance").isNumeric(),
-    body("creditReference").isNumeric(),
-    body("mobile").isNumeric(),
-    body("exposureLimit").isNumeric(),
+    body("commission").optional().isNumeric(),
+    body("openingBalance").optional().isNumeric(),
+    body("creditReference").optional().isNumeric(),
+    body("mobile").optional().isNumeric(),
+    body("exposureLimit").optional().isNumeric(),
+    body("partnership").optional().isNumeric(),
     body("password").isString().notEmpty().custom(validatePasswordLength),
     body("role").custom(validateRolelExists),
     body("domain").isString().notEmpty(),
@@ -111,6 +113,8 @@ routes.post(
         password,
         role,
         domain,
+        partnership,
+        currency
       } = req.body;
 
       const passwordSalt = bcrypt.genSaltSync(10);
@@ -124,6 +128,8 @@ routes.post(
         creditReference,
         mobile,
         exposureLimit,
+        partnership,
+        currency,
         password: hashedPassword,
         role,
         domain,
