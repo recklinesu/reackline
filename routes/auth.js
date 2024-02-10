@@ -454,9 +454,14 @@ routes.post(
   "/update-user/:userId?",
   [
     body("name")
-      .isLength({ min: 3 })
       .optional()
+      .isLength({ min: 3 })
+      .toString()
       .withMessage("Please provide a valid name"),
+    body("currency")
+      .optional()
+      .toString()
+      .withMessage("Please provide a valid currency"),
     body("commission")
       .optional()
       .isNumeric()
@@ -469,6 +474,10 @@ routes.post(
       .optional()
       .isNumeric()
       .withMessage("Commission can be only typeOf numeric value"),
+    body("partnership")
+      .optional()
+      .isNumeric()
+      .withMessage("Partnership can be only typeOf numeric value"),
     body("exposureLimit")
       .optional()
       .isNumeric()
@@ -523,6 +532,8 @@ routes.post(
         mobile: req.body.mobile,
         exposureLimit: req.body.exposureLimit,
         role: req.body.role,
+        currency: req.body.currency,
+        partnership: req.body.partnership,
         status: req.body.status,
       };
 
