@@ -4,7 +4,7 @@ require("dotenv").config();
 const domainSchema = new mongoose.Schema({
   title: { type: String, required: true },
   host: { type: String, required: true, unique: true },
-  addedAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
   primaryColor: { type: String, default: process.env.DEFAULT_COLOR },
   secondaryColor: { type: String, default: process.env.DEFAULT_COLOR },
   backgroundColor: { type: String, default: process.env.DEFAULT_COLOR },

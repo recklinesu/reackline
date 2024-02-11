@@ -13,7 +13,7 @@ const transitSchema = new mongoose.Schema({
     default: "failed",
     enum: ["success", "failed"],
   },
-  addedAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Transit = mongoose.model("transaction", transitSchema);

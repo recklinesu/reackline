@@ -35,8 +35,8 @@ routes.post("/create-domain", [jwtVerify] , [
   body("primaryColor").notEmpty().withMessage("primaryColor is required"),
   body("secondaryColor").notEmpty().withMessage("secondaryColor is required"),
   body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
-  body("logoUrl").notEmpty().withMessage("logoUrl is required"),
-  body("favIconUrl").notEmpty().withMessage("favIconUrl is required"),
+  body("logoUrl").notEmpty().isURL().withMessage("logoUrl is required"),
+  body("favIconUrl").notEmpty().isURL().withMessage("favIconUrl is required"),
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 
 ], async (req, res) => {
@@ -102,23 +102,14 @@ routes.post("/create-domain", [jwtVerify] , [
 });
 
 routes.post("/update-domain/:domainId", [jwtVerify] , [
-  body("title").notEmpty().withMessage("title is required"),
-  body("primaryColor").notEmpty().withMessage("primaryColor is required"),
-  body("secondaryColor").notEmpty().withMessage("secondaryColor is required"),
-  body("backgroundColor").notEmpty().withMessage("backgroundColor is required"),
-  body("logoUrl").isURL().withMessage("logoUrl is required"),
-  body("favIconUrl").isURL().withMessage("favIconUrl is required"),
-
+  body("title").optional().notEmpty().withMessage("title is required"),
+  body("primaryColor").optional().notEmpty().withMessage("primaryColor is required"),
+  body("secondaryColor").optional().notEmpty().withMessage("secondaryColor is required"),
+  body("backgroundColor").optional().notEmpty().withMessage("backgroundColor is required"),
+  body("logoUrl").optional().isURL().withMessage("logoUrl is required"),
+  body("favIconUrl").optional().isURL().withMessage("favIconUrl is required"),
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
-
-  const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-  if(!routePermission){
-        return res.status(401).json({
-            status: false,
-            message: "This user is not allowed for the following task.",
-        });
-  }
 
   const errors = validationResult(req);
 
@@ -131,6 +122,24 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
   }
 
   try {
+
+    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+    if(!masterChecked){
+      return res.status(401).send({
+        status: false,
+        message: "Invalid master password!",
+      });
+    }
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
 
     const data = {
       title:req.body.title,
@@ -168,16 +177,9 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
 });
 
-routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
-
-  const routePermission = await routePermissions(req.user._id, ["Watcher"])
-
-    if(!routePermission){
-          return res.status(401).json({
-              status: false,
-              message: "This user is not allowed for the following task.",
-          });
-    }
+routes.post("/delete-domain/:domainId", [jwtVerify] ,[
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+], async (req, res) => {
 
   const errors = validationResult(req);
 
@@ -190,6 +192,24 @@ routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
   }
 
   try {
+
+    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+    if(!masterChecked){
+      return res.status(401).send({
+        status: false,
+        message: "Invalid master password!",
+      });
+    }
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
 
     const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
 
@@ -218,17 +238,49 @@ routes.post("/delete-domain/:domainId", [jwtVerify] , async (req, res) => {
 
 });
 
-routes.get("/domains", async (req, res) => {
+
+routes.get("/domains/:page?/:pageSize?", [jwtVerify], async (req, res) => {
+
   try {
-    const domains = await Domain.find(); 
+
+    const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+    if(!routePermission){
+          return res.status(401).json({
+              status: false,
+              message: "This user is not allowed for the following task.",
+          });
+    }
+
+    const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const totalDocuments = await Domain.countDocuments();
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const domains = await Domain.find().sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize); 
 
     return res.status(200).json({
       status: true,
-      message: "Domains retrieved successfully",
-      domains,
+        message: "Domains fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        itemCount: domains.length,
+        totalPages: totalPages,
+        pageItems:domains
     });
+
   } catch (error) {
-    console.error("Error:", error);
     return res.status(500).json({
       status: false,
       message: "Internal server error",
@@ -287,58 +339,6 @@ routes.get("/domain/host/:host_name", async (req, res) => {
     }
 
     return res.status(200).json(domain);
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error",
-    });
-  }
-});
-
-routes.put("/update-domain/:domain_id", async (req, res) => {
-  try {
-    const domainId = req.params.domain_id;
-
-    if (!mongoose.Types.ObjectId.isValid(domainId)) {
-      return res.status(400).json({
-        status: false,
-        message: "Invalid domain ID format",
-      });
-    }
-
-    const {
-      title,
-      host,
-      primaryColor,
-      secondaryColor,
-      backgroundColor,
-      logoUrl,
-      favIconUrl,
-    } = req.body;
-
-    const updatedDomain = await Domain.findByIdAndUpdate(
-      domainId,
-      {
-        title,
-        host,
-        primaryColor,
-        secondaryColor,
-        backgroundColor,
-        logoUrl: logoUrl,
-        favIconUrl: favIconUrl,
-      },
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedDomain) {
-      return res.status(404).json({
-        status: false,
-        message: "Domain not found",
-      });
-    }
-
-    return res.status(200).json(updatedDomain);
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({
