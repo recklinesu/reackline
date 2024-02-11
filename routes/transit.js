@@ -51,16 +51,17 @@ routes.post("/add-balance", [jwtVerify], [
       });
     }
     try {
-        const permissionCheck = await routePermissions(req.user._id, ["Watcher"])
-
-        if(!permissionCheck){
-            return res.status(401).send({ auth: false, message: "You do not have permission to perform this action."})
-        }
 
         const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
         if(!masterChecked){
             return res.status(401).send({ auth: false, message: "Invalid master password."})
+        }
+
+        const permissionCheck = await routePermissions(req.user._id, ["Watcher"])
+
+        if(!permissionCheck){
+            return res.status(401).send({ auth: false, message: "You do not have permission to perform this action."})
         }
 
         const remark = req.body.remark??null
@@ -114,16 +115,17 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
       });
     }
     try {
-        const permissionChecked = await permissionCheck(req.user._id, req.params.userId)
-
-        if(!permissionChecked){
-            return res.status(401).send({ auth: false, message: "You do not have permission to perform this action."})
-        }
 
         const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
         if(!masterChecked){
             return res.status(401).send({ auth: false, message: "Invalid master password."})
+        }
+        
+        const permissionChecked = await permissionCheck(req.user._id, req.params.userId)
+
+        if(!permissionChecked){
+            return res.status(401).send({ auth: false, message: "You do not have permission to perform this action."})
         }
 
         const remark = req.body.remark??null
