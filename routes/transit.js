@@ -46,7 +46,7 @@ routes.post("/add-balance", [jwtVerify], [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -109,7 +109,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
     if (!errors.isEmpty()) {    
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -195,7 +195,7 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }

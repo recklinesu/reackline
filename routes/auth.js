@@ -77,7 +77,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -165,7 +165,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -366,7 +366,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -508,7 +508,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -671,6 +671,25 @@ routes.get(
     }
   }
 );
+
+// get my details
+routes.get("/letest-user-details", [jwtVerify], async(req,res)=>{
+  try {
+    const user = await UserDetails(req.user._id)
+
+    return res.status(200).json({
+      status:true,
+      message: "User's letest details fetched successfully!",
+      user
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+})
 
 // Common functions
 // ------------------------------------------------------------

@@ -20,7 +20,7 @@ routes.post("/create-new-role", jwtVerify,[
     if (!errors.isEmpty()) {
         return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
         });
     }
@@ -121,7 +121,7 @@ routes.post("/update-role-permissions", jwtVerify,[
     if (!errors.isEmpty()) {
         return res.status(400).json({
         status: false,
-        message: errors.array()[0]['msg'],
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
         errors: errors.array(),
         });
     }
