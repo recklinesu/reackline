@@ -113,6 +113,17 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
   body("backgroundColor").optional().notEmpty().withMessage("backgroundColor is required"),
   body("logoUrl").optional().isURL().withMessage("logoUrl is required"),
   body("favIconUrl").optional().isURL().withMessage("favIconUrl is required"),
+  body("status")
+      .optional()
+      .custom((value) => {
+        if (value === "active" || value === "suspend") {
+          return true;
+        } else {
+          throw new Error(
+            "The status could be either 'active', 'suspend'"
+          );
+        }
+      }),
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
 
@@ -153,6 +164,7 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
       backgroundColor:req.body.backgroundColor,
       logoUrl:req.body.logoUrl,
       favIconUrl:req.body.favIconUrl,
+      status:req.body.status
     }
 
     const checkDomain = await Domain.findById(new mongoose.Types.ObjectId(req.params.domainId))
