@@ -22,6 +22,8 @@ const validatePasswordLength = (value, name) => {
   return true;
 };
 
+
+// Create New Site
 routes.post("/create-domain", [jwtVerify] , [
   body("title").notEmpty().withMessage("title is required"),
   body("host").notEmpty().withMessage("host is required").custom(async(data, body)=>{
@@ -101,6 +103,9 @@ routes.post("/create-domain", [jwtVerify] , [
 
 });
 
+
+// Update Site details by id
+
 routes.post("/update-domain/:domainId", [jwtVerify] , [
   body("title").optional().notEmpty().withMessage("title is required"),
   body("primaryColor").optional().notEmpty().withMessage("primaryColor is required"),
@@ -177,6 +182,8 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
 });
 
+
+// Delete Site Details by ID
 routes.post("/delete-domain/:domainId", [jwtVerify] ,[
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
@@ -238,7 +245,7 @@ routes.post("/delete-domain/:domainId", [jwtVerify] ,[
 
 });
 
-
+// Get All Site Details
 routes.get("/domains/:page?/:pageSize?", [jwtVerify], async (req, res) => {
 
   try {
@@ -288,6 +295,9 @@ routes.get("/domains/:page?/:pageSize?", [jwtVerify], async (req, res) => {
   }
 });
 
+
+// Get Site Details by id
+
 routes.get("/domain/:domain_id", async (req, res) => {
   try {
     const domainId = req.params.domain_id;
@@ -317,6 +327,9 @@ routes.get("/domain/:domain_id", async (req, res) => {
     });
   }
 });
+
+
+// Get Site Details By Name
 
 routes.get("/domain/host/:host_name", async (req, res) => {
   try {
