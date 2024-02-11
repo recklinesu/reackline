@@ -222,15 +222,50 @@ routes.post(
 );
 
 // Get users route with JWT verification
-routes.get("/get-users", jwtVerify, async (req, res) => {
-  // console.log("Helllo ============>", req.user, req);
-  const users = await Users.find({}, "-password"); // Exclude the password field from the response
+routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
 
-  return res.status(200).json({
-    status: true,
-    message: "Users retrieved successfully",
-    users: users,
-  });
+  try {
+
+    const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id)});
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id)}).populate(["role"]).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+
+    if(!users.length){
+      return res.status(200).json({
+        status: true,
+        message: "No data found!"
+      })
+    }else{
+      return res.status(200).json({
+        status: true,
+        message: "Users fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        itemCount: users.length,
+        totalPages: totalPages,
+        pageItems:users
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
 });
 
 // Get users by status
