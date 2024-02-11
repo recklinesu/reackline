@@ -638,6 +638,9 @@ routes.get(
           },
         },
         {
+          $sort: { createdAt: -1 } // Sorting by createdAt field in descending order
+        },
+        {
           $skip: (page - 1) * pageSize,
         },
         {
