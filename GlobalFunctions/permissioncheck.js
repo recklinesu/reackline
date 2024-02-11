@@ -14,8 +14,8 @@ const permissionCheck = async (admin,worker) =>{
             return false
         }
 
-        const adminPermissions = adminData.role[0]
-        const workerPermissionsName = workerData.role[0].name
+        const adminPermissions = adminData.role
+        const workerPermissionsName = workerData.role.name
 
         checkPoint = null
         
