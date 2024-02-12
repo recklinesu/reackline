@@ -33,7 +33,49 @@ const userSchema = new mongoose.Schema({
     default: "active",
     enum: ["active", "suspend", "locked"],
   },
+  deleted: { type: Boolean, default: false } ,
+  deletedAt: { type: Date, required:false }
 });
+
+// Middleware to exclude 'deleted' field from query results
+userSchema.pre(/^find/, function(next) {
+  // 'this' refers to the query object
+  // Only include non-deleted users
+  this.where({ deleted: false });
+
+  // Only exclude 'deleted' field if it's not explicitly included in the query
+  if (!this._fields || !('deleted' in this._fields)) {
+    this.select('-deleted');
+  }
+
+  next();
+});
+
+// Filter
+// Middleware to exclude 'deleted' field from query results
+userSchema.pre(/^find/, function(next) {
+  // 'this' refers to the query object
+  // Only exclude 'deleted' field if it's not explicitly included in the query
+  if (!this._fields || !('deleted' in this._fields)) {
+    this.select('-deleted');
+  }
+  next();
+});
+
+// Middleware to handle retrieval of deleted users
+userSchema.pre(/^find/, function(next) {
+  // 'this' refers to the query object
+  // Check if 'deleted' field is explicitly specified in the query conditions
+  if ('deleted' in this.getQuery()) {
+    next();
+  } else {
+    // Include deleted users only if explicitly requested
+    this.where({ $or: [{ deleted: false }, { deleted: true }] });
+    next();
+  }
+});
+
+// Filter
 
 const User = mongoose.model("User", userSchema);
 

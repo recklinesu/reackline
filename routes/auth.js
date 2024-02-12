@@ -268,6 +268,236 @@ routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
   }
 });
 
+// Get deleted users route with JWT verification
+routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
+
+  try {
+
+    const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const totalDocuments = await Users.collection.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true});
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const users = await Users.collection.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true })
+    .project({ deleted: 0 })
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .toArray();
+
+    if(!users.length){
+      return res.status(200).json({
+        status: true,
+        message: "No data found!"
+      })
+    }else{
+      return res.status(200).json({
+        status: true,
+        message: "Deleted Users fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        itemCount: users.length,
+        totalPages: totalPages,
+        pageItems:users
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
+
+// delete users route with JWT verification
+routes.post("/delete-user/:userId?", [jwtVerify], [
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+],async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
+      status: false,
+      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+      errors: errors.array(),
+      });
+  }
+
+  try{
+
+    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+      return res.status(400).json({
+        status: false,
+        message: "Please provide a valid User ID."
+      })
+    }
+
+    const checkPermission = await PermissionCheck(req.user._id, req.params.userId);
+
+    if (!checkPermission) {
+      return res.status(401).json({
+        status: false,
+        message: "You don't have permission to perform this action",
+      });
+    }
+
+    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+    if(!masterChecked){
+      return res.status(401).send({
+        status: false,
+        message: "Invalid master password!",
+      });
+    }
+
+    const  user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true});
+
+    if(user){
+      return res.status(200).json({
+        status: true,
+        message: "User has been deleted successfully!",
+      })
+    }else{
+      return res.status(401).json({
+        status: true,
+        message: "Somthing went wrong!",
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
+// restore users route with JWT verification
+routes.post("/restore-user/:userId?", [jwtVerify], [
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+],async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
+      status: false,
+      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+      errors: errors.array(),
+      });
+  }
+
+  try{
+
+    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+      return res.status(400).json({
+        status: false,
+        message: "Please provide a valid User ID."
+      })
+    }
+
+    const checkPermission = await Users.collection.findOne({_id: new mongoose.Types.ObjectId(req.params.userId)})
+
+    if (!checkPermission || !checkPermission.createdBy.equals(req.user._id)) {
+      return res.status(401).json({
+        status: false,
+        message: "You don't have permission to perform this action",
+      });
+    }
+
+    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+
+    if(!masterChecked){
+      return res.status(401).send({
+        status: false,
+        message: "Invalid master password!",
+      });
+    }
+
+    const user = await Users.collection.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.params.userId)}, { $set: { deleted: false } }, { returnOriginal: false });
+
+    if(user){
+      return res.status(200).json({
+        status: true,
+        message: "User has been restored successfully!",
+      })
+    }else{
+      return res.status(401).json({
+        status: true,
+        message: "Somthing went wrong!",
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
+
+// delete users route with JWT verification
+routes.post("/delete-user/:userId?", [jwtVerify], [
+  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+],async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      return res.status(400).json({
+      status: false,
+      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+      errors: errors.array(),
+      });
+  }
+
+  try{
+
+    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+      return res.status(400).json({
+        status: false,
+        message: "Please provide a valid User ID."
+      })
+    }
+
+    const checkPermission = await PermissionCheck(req.user._id, req.params.userId);
+
+    if (!checkPermission) {
+      return res.status(401).json({
+        status: false,
+        message: "You don't have permission to perform this action",
+      });
+    }
+
+    const  user = await UserModel.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true});
+
+    return res.status(200).json({
+      status: true,
+      message: "Users has been deleted successfully!"
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
 // Get users by userId
 routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, res) => {
 
