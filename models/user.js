@@ -46,6 +46,7 @@ userSchema.pre(/^find/, function(next) {
   // Only exclude 'deleted' field if it's not explicitly included in the query
   if (!this._fields || !('deleted' in this._fields)) {
     this.select('-deleted');
+    this.select('-deletedAt');
   }
 
   next();

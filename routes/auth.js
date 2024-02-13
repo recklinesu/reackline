@@ -289,8 +289,8 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
     const users = await Users.collection.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true })
-    .project({ deleted: 0 })
-    .sort({ createdAt: -1 })
+    .project({ deleted: 0, deletedAt:0 })
+    .sort({ deletedAt: -1 })
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .toArray();
@@ -363,7 +363,7 @@ routes.post("/delete-user/:userId?", [jwtVerify], [
       });
     }
 
-    const  user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true});
+    const  user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true, deletedAt: new Date()});
 
     if(user){
       return res.status(200).json({
@@ -449,54 +449,6 @@ routes.post("/restore-user/:userId?", [jwtVerify], [
   }
 });
 
-
-// delete users route with JWT verification
-routes.post("/delete-user/:userId?", [jwtVerify], [
-  body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
-],async (req, res) => {
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-      return res.status(400).json({
-      status: false,
-      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
-      errors: errors.array(),
-      });
-  }
-
-  try{
-
-    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
-      return res.status(400).json({
-        status: false,
-        message: "Please provide a valid User ID."
-      })
-    }
-
-    const checkPermission = await PermissionCheck(req.user._id, req.params.userId);
-
-    if (!checkPermission) {
-      return res.status(401).json({
-        status: false,
-        message: "You don't have permission to perform this action",
-      });
-    }
-
-    const  user = await UserModel.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true});
-
-    return res.status(200).json({
-      status: true,
-      message: "Users has been deleted successfully!"
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error" + error,
-    });
-  }
-});
 
 // Get users by userId
 routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, res) => {
