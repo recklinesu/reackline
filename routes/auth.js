@@ -289,7 +289,7 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
     const users = await Users.collection.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true })
-    .project({ deleted: 0, deletedAt:0 })
+    .project({ deleted: 0})
     .sort({ deletedAt: -1 })
     .skip((page - 1) * pageSize)
     .limit(pageSize)
