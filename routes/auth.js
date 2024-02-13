@@ -845,6 +845,8 @@ routes.post(
       return res.status(200).json({
         status: true,
         message: "User details has been updated successfully!",
+        updatedParams: body
+        
       });
     } catch (error) {
       return res.status(500).json({
