@@ -830,7 +830,7 @@ routes.post(
         );
       } else {
         updatedUserDetails = await Users.findByIdAndUpdate(
-          new mongoose.Types.ObjectId(req.user_id),
+          new mongoose.Types.ObjectId(req.user._id),
           body
         );
       }
@@ -838,7 +838,7 @@ routes.post(
       if (!updatedUserDetails) {
         return res.status(400).json({
           status: false,
-          message: "somthing went wring",
+          message: "something went wrong",
         });
       }
 
