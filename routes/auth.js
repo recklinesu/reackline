@@ -740,11 +740,11 @@ routes.post(
     body("openingBalance")
       .optional()
       .isNumeric()
-      .withMessage("Commission can be only typeOf numeric value"),
+      .withMessage("openingBalance can be only typeOf numeric value"),
     body("creditReference")
       .optional()
       .isNumeric()
-      .withMessage("Commission can be only typeOf numeric value"),
+      .withMessage("creditReference can be only typeOf numeric value"),
     body("partnership")
       .optional()
       .isNumeric()
@@ -752,12 +752,12 @@ routes.post(
     body("exposureLimit")
       .optional()
       .isNumeric()
-      .withMessage("Commission can be only typeOf numeric value"),
+      .withMessage("exposureLimit can be only typeOf numeric value"),
     body("mobile")
       .optional()
       .isNumeric()
       .isLength({ min: 10 })
-      .withMessage("Commission can be only typeOf numeric value"),
+      .withMessage("mobile can be only typeOf numeric value"),
     body("role").optional().custom(validateRolelExists),
     body("status")
       .optional()
