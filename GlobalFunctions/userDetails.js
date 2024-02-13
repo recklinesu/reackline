@@ -5,7 +5,7 @@ const userDetails = async (userId) =>{
 
     const userIdToObj = new mongoose.Types.ObjectId(userId)
 
-    const user = await Users.findById(userIdToObj).populate(['role'])
+    const user = await Users.findById(userIdToObj).populate(['role','domain'])
 
       if(!user){
         return false;
