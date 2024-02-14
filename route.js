@@ -1,8 +1,9 @@
+const path = require("path")
 const routesInit = (app)=>{
 
     // Routes
     app.get("/", (req, res)=>{
-      res.send("Welcome to the Reckline API");
+      res.sendFile(path.join(__dirname, 'doc', 'index.html'));
     })
 
     // Serve Socket.IO client library
