@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "suspend", "locked"],
   },
   deleted: { type: Boolean, default: false } ,
+  online: { type: Boolean, default: false } ,
   deletedAt: { type: Date, required:false }
 });
 
@@ -86,6 +87,7 @@ const User = mongoose.model("User", userSchema);
     console.log(
       "Users created successfully \n ======================================>"
     );
+    // await User.updateMany({online:false})
   } catch (error) {
     console.error("Error creating indexes:", error.message);
   }
