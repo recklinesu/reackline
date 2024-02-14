@@ -1,18 +1,24 @@
-const {Server} = require("socket.io")
+// socketInit.js
 
-const socketFunc = (app)=>{
-    io = new Server()
-    io.use(app)
+const socketIO = require('socket.io');
 
+function socketInit(server) {
+    const io = socketIO(server);
 
-    io.on("connection", (socket)=>{
-        console.log("User connnected");
+    // Define event handlers
+    io.on('connection', (socket) => {
+        console.log('A user connected');
 
-        socket.on("disconnect", ()=>{
-            console.log("User Disconnected");
-        })
-    })
-    
+        // Handle disconnect event
+        socket.on('disconnect', () => {
+            console.log('User disconnected');
+        });
+
+        // Handle custom events
+        socket.on('some_event', (data) => {
+            console.log('Received data:', data);
+        });
+    });
 }
 
-module.exports = socketFunc
+module.exports = socketInit;

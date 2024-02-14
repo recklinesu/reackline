@@ -16,8 +16,6 @@ const port = process.env.PORT || 5000;
 connectToMongo();
 // Initialize routes
 routeInit(app)
-// Initialize Sockets
-socketInit(app)
 
 console.log('\x1b[35m'+"______                            _ _                    "+'\x1b[0m');
 console.log('\x1b[35m'+"| ___ \\                          (_) |                   "+'\x1b[0m');
@@ -29,6 +27,9 @@ console.log('\x1b[35m'+"        __/ |                                           
 console.log('\x1b[35m'+"       |___/                                             "+'\x1b[0m');
 
 // lIsten On Port
-app.listen(port, () => {
+const Server = app.listen(port, () => {
   console.log('\x1b[33m'+`\n\n---------------------------\nApp is listening on port ${port}\n---------------------------\n\n`);
 });
+
+// Initialize Sockets
+socketInit(Server)
