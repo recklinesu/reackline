@@ -233,7 +233,7 @@ routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
         : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id)});
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), deleted:false});
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -469,7 +469,7 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
         : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.params.userId)});
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.params.userId), deleted:false});
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -531,7 +531,7 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
         : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status});
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status, deleted:false});
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -587,7 +587,7 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
         : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)});
+    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId), deleted:false});
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -871,7 +871,7 @@ routes.get(
       const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
       const totalDocuments = await PassowordHistory.countDocuments({
-        updatedOf: req.user._id,
+        updatedOf: req.user._id, deleted:false
       });
 
       const remainingPages = Math.ceil(
