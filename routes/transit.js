@@ -142,7 +142,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
             await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Insufficient Balance.", remark)
             return res.status(401).json({
                 status:false,
-                message:"You don't have insufficient balance in your wallet."
+                message:"You don't have sufficient balance in your wallet."
             })
         }
 
@@ -167,6 +167,86 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
         return res.status(200).json({
             status: true,
             message: "Amount of '"+balance+"' has been transferred successfully to "+payeeDetails.userName+"'s account."
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message:"Internal error!"+error.message
+        })
+    }
+})
+
+// Withdraw money  to user wallet
+routes.post("/withdraw-balance/:userId", [jwtVerify], [
+
+    body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
+    body("remark").optional().isString(),
+    body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+
+], async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {    
+      return res.status(400).json({
+        status: false,
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        errors: errors.array(),
+      });
+    }
+    try {
+
+        const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
+
+        if(!masterChecked){
+            return res.status(401).send({ auth: false, message: "Invalid master password."})
+        }
+        
+        const permissionChecked = await permissionCheck(req.user._id, req.params.userId)
+
+        if(!permissionChecked){
+            return res.status(401).send({ auth: false, message: "You do not have permission to perform this action."})
+        }
+
+        const remark = req.body.remark??null
+
+        const balance = parseInt(req.body.balance)
+
+        const PayerDetails = await UserDetails(req.params.userId)
+
+        const payerOpeningBalance = parseInt(PayerDetails.openingBalance)
+
+        const payeeBalance = parseInt(req.user.openingBalance)
+
+        if(payerOpeningBalance < balance){
+            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Insufficient Balance.", remark)
+            return res.status(401).json({
+                status:false,
+                message:"User don't have sufficient balance in his wallet."
+            })
+        }
+
+        const payerNewOpeningBalance = (payerOpeningBalance-balance)
+
+        const payeeNewBalance = (payeeBalance+balance)
+
+        const updatedPayee = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: payeeNewBalance})
+
+        const updatedPayer =  await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {openingBalance: payerNewOpeningBalance})
+
+        if(!updatedPayee || !updatedPayer){
+            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark)
+            return res.status(401).json({
+                status:false,
+                message:"Somthing went wrong!"
+            })
+        }
+
+        await transactionLog(req.user._id, PayerDetails._id, balance, "success",  "Amount has been recieved successfully.", remark)
+
+        return res.status(200).json({
+            status: true,
+            message: "Amount of '"+balance+"' has been recieved successfully from "+PayerDetails.userName+"'s account."
         })
 
     } catch (error) {
