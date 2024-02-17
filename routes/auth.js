@@ -737,10 +737,6 @@ routes.post(
       .optional()
       .isNumeric()
       .withMessage("Commission can be only typeOf numeric value"),
-    body("openingBalance")
-      .optional()
-      .isNumeric()
-      .withMessage("openingBalance can be only typeOf numeric value"),
     body("creditReference")
       .optional()
       .isNumeric()
@@ -798,7 +794,6 @@ routes.post(
       const body = {
         name: req.body.name,
         commission: req.body.commission,
-        openingBalance: req.body.openingBalance,
         creditReference: req.body.creditReference,
         mobile: req.body.mobile,
         exposureLimit: req.body.exposureLimit,
@@ -828,11 +823,19 @@ routes.post(
           new mongoose.Types.ObjectId(req.params.userId),
           body
         );
+
+        if(req.body.creditReference){
+          await transactionLogCredit(req.user._id, req.params.userId, await UserDetails(req.params.userId).creditReference, req.body.creditReference)
+        }
       } else {
         updatedUserDetails = await Users.findByIdAndUpdate(
           new mongoose.Types.ObjectId(req.user._id),
           body
         );
+
+        if(req.body.creditReference){
+          await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, req.body.creditReference)
+        }
       }
 
       if (!updatedUserDetails) {
@@ -982,5 +985,18 @@ const updateHistoryOfPassword = async (updatedOf, updatedBy) => {
     return false;
   }
 };
+
+const transactionLogCredit = async (from, of, oldCredit, newCredit)=>{
+  try {
+      const logTransit = await Transactions.create({
+          from,
+          of,
+          oldCredit,
+          newCredit
+      });
+  } catch (error) {
+      console.log(error.message);
+  }
+}
 
 module.exports = routes;
