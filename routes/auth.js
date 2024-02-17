@@ -826,7 +826,8 @@ routes.post(
         );
 
         if(req.body.creditReference){
-          await transactionLogCredit(req.user._id, req.params.userId, await UserDetails(req.params.userId).creditReference, req.body.creditReference)
+          const userdetailscredit = await UserDetails(req.params.userId);
+          await transactionLogCredit(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
         }
       } else {
         updatedUserDetails = await Users.findByIdAndUpdate(
@@ -835,7 +836,7 @@ routes.post(
         );
 
         if(req.body.creditReference){
-          await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, req.body.creditReference)
+          await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, parseInt(req.body.creditReference))
         }
       }
 
