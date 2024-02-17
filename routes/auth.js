@@ -820,24 +820,28 @@ routes.post(
       let updatedUserDetails = null;
 
       if (req.params.userId) {
-        updatedUserDetails = await Users.findByIdAndUpdate(
-          new mongoose.Types.ObjectId(req.params.userId),
-          body
-        );
-
+        // History
         if(req.body.creditReference){
           const userdetailscredit = await UserDetails(req.params.userId);
           await transactionLogCredit(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
         }
+        
+        // Update
+        updatedUserDetails = await Users.findByIdAndUpdate(
+          new mongoose.Types.ObjectId(req.params.userId),
+          body
+        );
       } else {
+        // History
+        if(req.body.creditReference){
+          await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, parseInt(req.body.creditReference))
+        }
+        
+        // Update
         updatedUserDetails = await Users.findByIdAndUpdate(
           new mongoose.Types.ObjectId(req.user._id),
           body
         );
-
-        if(req.body.creditReference){
-          await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, parseInt(req.body.creditReference))
-        }
       }
 
       if (!updatedUserDetails) {

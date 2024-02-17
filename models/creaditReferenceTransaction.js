@@ -5,7 +5,7 @@ const transitSchema = new mongoose.Schema({
   from: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   of: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   oldCredit: { type: Number, default: 0, required: true },
-  newCredit: { type: String, required: false },
+  newCredit: { type: Number, default: 0,required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
