@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const aes256 = require("aes256");
 const Users = require("../models/user");
+const CreditTransaction = require("../models/creaditReferenceTransaction");
 const PassowordHistory = require("../models/passwordHistory");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
@@ -988,7 +989,7 @@ const updateHistoryOfPassword = async (updatedOf, updatedBy) => {
 
 const transactionLogCredit = async (from, of, oldCredit, newCredit)=>{
   try {
-      const logTransit = await Transactions.create({
+      const logTransit = await CreditTransaction.create({
           from,
           of,
           oldCredit,
