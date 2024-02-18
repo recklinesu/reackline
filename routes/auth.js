@@ -829,7 +829,7 @@ routes.post(
 
         if(req.body.partnership){
           const userdetailscredit = await UserDetails(req.params.userId);
-          await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
+          await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.partnership, parseInt(req.body.partnership))
         }
         
         // Update
@@ -844,9 +844,10 @@ routes.post(
         }
 
         if(req.body.partnership){
-          const userdetailscredit = await UserDetails(req.params.userId);
-          await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
+          await transactionLogPartnerShip(req.user._id, req.user._id, req.user.partnership, parseInt(req.body.partnership))
         }
+
+
         
         // Update
         updatedUserDetails = await Users.findByIdAndUpdate(
