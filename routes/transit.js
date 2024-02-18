@@ -269,6 +269,13 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
             "The status could be either 'sent', 'received'"
           );
         }
+    }),
+
+    body("userId").optional().custom(async (value) => {
+        const data = await Users.findById(new mongoose.Types.ObjectId(value));
+        if(!data){
+            throw new Error('User not found!')
+        }
     })
 
 ], async (req, res) => {
@@ -292,12 +299,19 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
         const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
         let filterCriteria = null;
+        let userIdFilter = null;
+
+        if(req.body.userId){
+            userIdFilter = req.body.userId;
+        }else{
+            userIdFilter = req.user._id;
+        }
 
         if(req.body.filter){
-            filterCriteria = req.body.filter === "sent" ? { payer: req.user._id } : { payee: req.user._id };
+            filterCriteria = req.body.filter === "sent" ? { payer: userIdFilter } : { payee: userIdFilter };
         }else{
             filterCriteria = {
-                $or: [{ payee: req.user._id  }, { payer: req.user._id  }],
+                $or: [{ payee: userIdFilter  }, { payer: userIdFilter  }],
             }
         }
 
