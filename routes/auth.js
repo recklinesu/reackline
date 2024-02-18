@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const aes256 = require("aes256");
 const Users = require("../models/user");
 const CreditTransaction = require("../models/creaditReferenceTransaction");
+const PartnershipTransaction = require("../models/partnershipTransaction");
 const PassowordHistory = require("../models/passwordHistory");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
@@ -825,6 +826,11 @@ routes.post(
           const userdetailscredit = await UserDetails(req.params.userId);
           await transactionLogCredit(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
         }
+
+        if(req.body.partnership){
+          const userdetailscredit = await UserDetails(req.params.userId);
+          await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
+        }
         
         // Update
         updatedUserDetails = await Users.findByIdAndUpdate(
@@ -835,6 +841,11 @@ routes.post(
         // History
         if(req.body.creditReference){
           await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, parseInt(req.body.creditReference))
+        }
+
+        if(req.body.partnership){
+          const userdetailscredit = await UserDetails(req.params.userId);
+          await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
         }
         
         // Update
@@ -995,6 +1006,19 @@ const updateHistoryOfPassword = async (updatedOf, updatedBy) => {
 const transactionLogCredit = async (from, of, oldCredit, newCredit)=>{
   try {
       const logTransit = await CreditTransaction.create({
+          from,
+          of,
+          oldCredit,
+          newCredit
+      });
+  } catch (error) {
+      console.log(error.message);
+  }
+}
+
+const transactionLogPartnerShip = async (from, of, oldCredit, newCredit)=>{
+  try {
+      const logTransit = await PartnershipTransaction.create({
           from,
           of,
           oldCredit,
