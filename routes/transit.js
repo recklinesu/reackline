@@ -494,7 +494,7 @@ routes.post("/partnership-transactions/:page?/:pageSize?", [jwtVerify], [
         }else{
         return res.status(200).json({
             status: true,
-            message: "Credit reference transactions fetched successfully.",
+            message: "Partnership transactions fetched successfully.",
             currentPage: page,
             pageSize: pageSize,
             itemCount: transactions.length,
