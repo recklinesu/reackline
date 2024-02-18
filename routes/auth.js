@@ -1016,13 +1016,13 @@ const transactionLogCredit = async (from, of, oldCredit, newCredit)=>{
   }
 }
 
-const transactionLogPartnerShip = async (from, of, oldCredit, newCredit)=>{
+const transactionLogPartnerShip = async (from, of, oldPartnership, newPartnership)=>{
   try {
       const logTransit = await PartnershipTransaction.create({
           from,
           of,
-          oldCredit,
-          newCredit
+          oldPartnership,
+          newPartnership
       });
   } catch (error) {
       console.log(error.message);

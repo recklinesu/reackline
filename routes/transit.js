@@ -8,6 +8,8 @@ const Users = require("../models/user");
 const PassowordHistory = require("../models/passwordHistory");
 const Roles = require("../models/roles");
 const Transactions = require("../models/transaction")
+const CreditTransaction = require("../models/creaditReferenceTransaction");
+const PartnershipTransaction = require("../models/partnershipTransaction");
 const jwtVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck");
@@ -337,6 +339,162 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
         return res.status(200).json({
             status: true,
             message: "Transactions fetched successfully.",
+            currentPage: page,
+            pageSize: pageSize,
+            itemCount: transactions.length,
+            totalPages: totalPages,
+            pageItems:transactions
+        })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message:"Internal error!"+error.message
+        })
+    }
+})
+
+// credit reference transaction history to user wallet
+routes.post("/credit-transactions/:page?/:pageSize?", [jwtVerify], [
+
+    body("userId").optional().custom(async (value) => {
+        const data = await Users.findById(new mongoose.Types.ObjectId(value));
+        if(!data){
+            throw new Error('User not found!')
+        }
+    })
+
+], async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: false,
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        errors: errors.array(),
+      });
+    }
+    try {
+
+        const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+        
+        const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+        let userIdFilter = null;
+
+        if(req.body.userId){
+            userIdFilter = req.body.userId;
+        }else{
+            userIdFilter = req.user._id;
+        }
+
+        const filterCriteria = { of: userIdFilter };
+
+        const totalDocuments = await CreditTransaction.countDocuments(filterCriteria);
+
+        const remainingPages = Math.ceil(
+            (totalDocuments - (page - 1) * pageSize) / pageSize
+          );
+      
+        const totalPages = Math.ceil(totalDocuments / pageSize);
+
+
+        const transactions = await CreditTransaction.find(filterCriteria)
+        .populate("from", "userName name")
+        .populate("of", "userName name").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
+
+        if(!transactions.length){
+        return res.status(200).json({
+            status: true,
+            message: "No data found!"
+        })
+        }else{
+        return res.status(200).json({
+            status: true,
+            message: "Credit reference transactions fetched successfully.",
+            currentPage: page,
+            pageSize: pageSize,
+            itemCount: transactions.length,
+            totalPages: totalPages,
+            pageItems:transactions
+        })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message:"Internal error!"+error.message
+        })
+    }
+})
+
+// Partnership transaction history to user wallet
+routes.post("/partnership-transactions/:page?/:pageSize?", [jwtVerify], [
+
+    body("userId").optional().custom(async (value) => {
+        const data = await Users.findById(new mongoose.Types.ObjectId(value));
+        if(!data){
+            throw new Error('User not found!')
+        }
+    })
+
+], async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: false,
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        errors: errors.array(),
+      });
+    }
+    try {
+
+        const page = req.params.page
+        ? parseInt(req.params.page) < 1
+          ? 1
+          : parseInt(req.params.page)
+        : 1;
+        
+        const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+        let userIdFilter = null;
+
+        if(req.body.userId){
+            userIdFilter = req.body.userId;
+        }else{
+            userIdFilter = req.user._id;
+        }
+
+        const filterCriteria = { of: userIdFilter };
+
+        const totalDocuments = await PartnershipTransaction.countDocuments(filterCriteria);
+
+        const remainingPages = Math.ceil(
+            (totalDocuments - (page - 1) * pageSize) / pageSize
+          );
+      
+        const totalPages = Math.ceil(totalDocuments / pageSize);
+
+
+        const transactions = await PartnershipTransaction.find(filterCriteria)
+        .populate("from", "userName name")
+        .populate("of", "userName name").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
+
+        if(!transactions.length){
+        return res.status(200).json({
+            status: true,
+            message: "No data found!"
+        })
+        }else{
+        return res.status(200).json({
+            status: true,
+            message: "Credit reference transactions fetched successfully.",
             currentPage: page,
             pageSize: pageSize,
             itemCount: transactions.length,

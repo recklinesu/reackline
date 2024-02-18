@@ -4,8 +4,8 @@ require("dotenv").config();
 const transitSchema = new mongoose.Schema({
   from: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
   of: {type: mongoose.Schema.Types.ObjectId, ref: "User",required:true},
-  oldCredit: { type: Number, default: 0, required: true },
-  newCredit: { type: Number, default: 0,required: true },
+  oldPartnership: { type: Number, default: 0, required: true },
+  newPartnership: { type: Number, default: 0,required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
