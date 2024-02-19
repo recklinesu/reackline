@@ -33,3 +33,4 @@ const Server = app.listen(port, () => {
 
 // Initialize Sockets
 // socketInit(Server)
+// Init routing
