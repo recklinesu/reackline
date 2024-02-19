@@ -15,7 +15,21 @@ const port = process.env.PORT || 5000;
 // Connect to database
 connectToMongo();
 // Initialize routes
-routeInit(app)
+// routeInit(app)
+// Routes
+app.get("/", (req, res)=>{
+  res.sendFile(path.join(__dirname, 'doc', 'index.html'));
+})
+
+// Serve Socket.IO client library
+app.get('/socket.io/socket.io.js', (req, res) => {
+  res.sendFile(__dirname + 'node_modules/socket.io/client-dist/socket.io.js');
+});
+
+app.use("/api", require("./routes/domain"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/transit", require("./routes/transit"));
+app.use("/api/settings", require("./routes/roles"));
 
 console.log('\x1b[35m'+"______                            _ _                    "+'\x1b[0m');
 console.log('\x1b[35m'+"| ___ \\                          (_) |                   "+'\x1b[0m');
@@ -33,4 +47,3 @@ const Server = app.listen(port, () => {
 
 // Initialize Sockets
 // socketInit(Server)
-// Init routing
