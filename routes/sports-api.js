@@ -6,14 +6,15 @@ require("dotenv").config();
 const routes = express.Router();
 
 
-routes.get("/get-data", (req, res) => {
+routes.get("/get-data/:api", (req, res) => {
     request.get({
-        url: 'http://142.93.36.1/api/v1/fetch_data?Action=listEventTypes'
+        url: req.params.api
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             console.log(body);
             res.send(body);
         } else {
+            res.send(body); 
             console.error("Error:", error);
             res.status(response.statusCode).send("Error fetching data");
         }
