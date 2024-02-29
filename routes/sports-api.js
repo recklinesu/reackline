@@ -6,9 +6,9 @@ require("dotenv").config();
 const routes = express.Router();
 
 
-routes.get("/get-data/:api?", (req, res) => {
+routes.get("/get-data", (req, res) => {
     request.get({
-        url: req.params.api
+        url: req.body.api,
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             console.log(body);
