@@ -6,7 +6,7 @@ require("dotenv").config();
 const routes = express.Router();
 
 
-routes.get("/get-data/:api", (req, res) => {
+routes.get("/get-data/:api?", (req, res) => {
     request.get({
         url: req.params.api
     }, function(error, response, body) {
