@@ -11,12 +11,12 @@ routes.get("/get-data", (req, res) => {
         url: req.body.api,
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
-            console.log(body);
+            // console.log(body);
             res.send(body);
         } else {
             res.send(body); 
-            console.error("Error:", error);
-            res.status(response.statusCode).send("Error fetching data");
+            // console.error("Error:", error);
+            // res.status(response.statusCode).send("Error fetching data");
         }
     });
 });
