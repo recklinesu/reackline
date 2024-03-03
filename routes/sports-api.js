@@ -276,7 +276,7 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
     }
 });
 
-// Fetch matches via event as compatition id
+// Fetch matches scores via match ids
 routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
     try {
 
