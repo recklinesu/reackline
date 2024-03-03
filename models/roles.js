@@ -16,6 +16,99 @@ let Role = mongoose.model("Role", roleSchema);
 
 (async () => {
   try {
+
+    try {
+      await Role.create({
+        name:"Watcher",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"Declare",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"Creater",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"WhiteLabel",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"Super",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"Master",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"Agent",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    await Role.create({
+        name:"User",
+        canWatcher:false,
+        canDeclare:false,
+        canCreater:false,
+        canWhiteLabel:false,
+        canSuper:false,
+        canMaster:false,
+        canAgent:false,
+        canUser:false,
+    })
+    } catch (error) {
+      
+    }
     await Role.createIndexes();
     console.log(
       "Roles created successfully \n ======================================>"
