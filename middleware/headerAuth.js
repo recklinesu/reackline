@@ -5,11 +5,15 @@ const mongoose = require("mongoose");
 const headerVerify = async (req, res, next) => {
 
   try {
-    const domainName = req.headers["host"];
+    const domainName = req.headers["origin"];
+
+    if(!domainName){
+        return res.status(403).send({ status: false , error: "Unknown host",message: "Missing Header: Origin" });
+    }
     
     const filterCriteria = {
-        $or: [{ host: domainName  }, { adminHost: domainName }],
-      }
+        $or: [{ api: domainName  }, { api1: domainName }, {api2, domainName}],
+    }
 
     const domainData = await Domains.findOne(filterCriteria)
 
@@ -19,7 +23,8 @@ const headerVerify = async (req, res, next) => {
       .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
     }
 
-    next();
+    res.send(req.headers)
+    // next();
 
   } catch (error) {
     return res
