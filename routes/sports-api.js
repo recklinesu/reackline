@@ -63,6 +63,105 @@ routes.post("/create-origin", [jwtVerify], [
       }
 })
 
+routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
+    try {
+        const page = req.params.page
+          ? parseInt(req.params.page) < 1
+            ? 1
+            : parseInt(req.params.page)
+          : 1;
+        const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+  
+        const totalDocuments = await ApiOrigins.countDocuments();
+  
+        const remainingPages = Math.ceil(
+          (totalDocuments - (page - 1) * pageSize) / pageSize
+        );
+  
+        const totalPages = Math.ceil(totalDocuments / pageSize);
+  
+        const userPassUpdateHistroy = await ApiOrigins.aggregate([
+          {
+            $sort: { createdAt: -1 } // Sorting by createdAt field in descending order
+          },
+          {
+            $skip: (page - 1) * pageSize,
+          },
+          {
+            $limit: pageSize,
+          },
+        ]);
+  
+        if (!userPassUpdateHistroy.length) {
+          return res
+            .status(200)
+            .json({ status: true, message: "No data found!" });
+        }
+  
+        return res.status(200).json({
+          status: true,
+          message: "Api Origins have been fetched successfully!",
+          currentPage: page,
+          pageSize: pageSize,
+          itemCount: userPassUpdateHistroy.length,
+          totalPages: totalPages,
+          pageItems: userPassUpdateHistroy,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          status: false,
+          message: "Internal server error" + error,
+        });
+      }
+})
+
+routes.post("/delete-origin/:originId", [jwtVerify], async (req, res)=>{
+    try {
+
+        const routePermission = await routePermissions(req.user._id, ["Watcher"])
+
+        if(!routePermission){
+            return res.status(401).json({
+                status: false,
+                message: "This user is not allowed for the following task.",
+            });
+      }
+
+        if(!mongoose.Types.ObjectId.isValid(req.params.originId)){
+            return res.status(400).json({
+              status: false,
+              message: "Please provide a valid Origin ID."
+            })
+          }
+
+          if(!await ApiOrigins.findById(new mongoose.Types.ObjectId(req.params.originId))){
+            return res.status(400).json({
+                status: false,
+                message: "Please provide a valid Origin ID."
+              })
+          }
+    
+          const deleteOrigin = await ApiOrigins.findByIdAndDelete(new mongoose.Types.ObjectId(req.params.originId))
+
+          if(!deleteOrigin){
+            return res.status(403).json({
+                status: true,
+                message: "Somthing went wrong"
+              })
+          }
+    
+          return res.status(200).json({
+            status: true,
+            message: "Following origin has been deleted successfully!"
+          })
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "Internal error!"+error
+        }); 
+    }
+})
+
 
 routes.get("/get-data", [jwtVerify], (req, res) => {
     request.get({
