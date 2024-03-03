@@ -357,7 +357,7 @@ routes.get("/domain/host/:host_name", async (req, res) => {
     }
 
     const filterCriteria = {
-      $or: [{ host: hostName  }, { adminHost: "admin."+hostName  }],
+      $or: [{ host: hostName  }, { adminHost: hostName }],
     }
 
     const domain = await Domain.findOne(filterCriteria);
