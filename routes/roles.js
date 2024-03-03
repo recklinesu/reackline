@@ -165,7 +165,7 @@ routes.post("/update-role-permissions", jwtVerify,[
             });
         }
 
-        return res.status(500).json({
+        return res.status(200).json({
             status: true,
             message: "Roles has been updated successfully!",
             preview: await Roles.findById(req.body.roleId).select(["-_id","-__v"])
