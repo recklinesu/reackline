@@ -1,6 +1,7 @@
 const express = require("express");
 const Domains = require("../models/domain");
 const mongoose = require("mongoose");
+const ApiOrigins = require("../models/apiOrigin");
 
 const headerVerify = async (req, res, next) => {
 
@@ -15,7 +16,7 @@ const headerVerify = async (req, res, next) => {
         $or: [{ api: domainName  }, { api1: domainName }, {api2, domainName}],
     }
 
-    const domainData = await Domains.findOne(filterCriteria)
+    const domainData = await ApiOrigins.findOne(filterCriteria)
 
     if(!domainData){
         return res
