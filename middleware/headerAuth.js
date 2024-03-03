@@ -23,8 +23,7 @@ const headerVerify = async (req, res, next) => {
       .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
     }
 
-    res.send(req.headers)
-    // next();
+    next();
 
   } catch (error) {
     return res
