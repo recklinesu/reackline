@@ -82,6 +82,8 @@ routes.post("/create-domain", [jwtVerify] , [
       logoUrl,
       favIconUrl,
     } = req.body;
+
+    req.body.adminHost = "admin."+host;
     
     const newDomain = new Domain(req.body)
 
@@ -354,7 +356,11 @@ routes.get("/domain/host/:host_name", async (req, res) => {
       });
     }
 
-    const domain = await Domain.find({ host: hostName });
+    const filterCriteria = {
+      $or: [{ host: hostName  }, { adminHost: "admin."+hostName  }],
+    }
+
+    const domain = await Domain.findOne(filterCriteria);
 
     if (!domain) {
       return res.status(404).json({
