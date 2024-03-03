@@ -9,7 +9,7 @@ const headerVerify = async (req, res, next) => {
     const domainName = req.headers["origin"];
 
     if(!domainName){
-        return res.status(403).send({ status: false , error: "Unknown host",message: "Missing Header: Origin" });
+        return res.status(403).send({ status: false , error: "Unauthorized" ,message: "Unknown Host!" });
     }
     
     const filterCriteria = {
