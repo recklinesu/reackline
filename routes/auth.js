@@ -892,7 +892,7 @@ routes.get(
       const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
       const totalDocuments = await PassowordHistory.countDocuments({
-        updatedOf: req.user._id, deleted:false
+        updatedOf: req.user._id
       });
 
       const remainingPages = Math.ceil(
