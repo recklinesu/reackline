@@ -215,10 +215,41 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
 
 
 // Fetch compatitions as per event
-routes.get("/fetch-event-compatitions/:event_id", [headerVerify], (req, res) => {
+routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL+"?Action=listCompetitions&EventTypeID="+req.params.event_id;
+
+        request.get({
+            url: api,
+            forever: false
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                res.status(200).json({
+                    status: true,
+                    message: "Data has been fetched successfully!",
+                    data: body
+                });
+            } else {
+                res.status(500).json({
+                    status: false,
+                    message: "Internal error!"
+                }); 
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "Internal error!"
+        }); 
+    }
+});
+
+// Fetch matches via event as compatition id
+routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) => {
+    try {
+
+        const api = process.env.APP_SPORTS_URL+"?Action=listEvents&EventTypeID="+req.params.event_id+"&CompetitionID="+req.params.compation_id;
 
         request.get({
             url: api,
