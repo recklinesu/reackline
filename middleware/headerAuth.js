@@ -9,8 +9,9 @@ const headerVerify = async (req, res, next) => {
     const domainName = req.headers["origin"];
 
     if(!domainName){
-        return res.status(403).send({ status: false , error: "Unauthorized" ,message: "Unknown Host!" });
-    }
+      return res
+      .status(401)
+      .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });    }
     
     const filterCriteria = {
         $or: [{ api: domainName  }, { api1: domainName }, {api2: domainName}],
@@ -20,7 +21,7 @@ const headerVerify = async (req, res, next) => {
 
     if(!domainData){
         return res
-      .status(403)
+      .status(401)
       .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
     }
 
@@ -28,8 +29,8 @@ const headerVerify = async (req, res, next) => {
 
   } catch (error) {
     return res
-      .status(403)
-      .json({ status: false, error: "Unauthorized", message: "Invalid host!" });
+      .status(401)
+      .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
   }
 
 };

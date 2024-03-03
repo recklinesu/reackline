@@ -11,6 +11,7 @@ require("dotenv").config();
 
 const routes = express.Router();
 
+// Create  a new API Origin
 routes.post("/create-origin", [jwtVerify], [
     body("api").notEmpty().custom(async (e)=>{
         const check = await ApiOrigins.findOne({api: e})
@@ -63,6 +64,7 @@ routes.post("/create-origin", [jwtVerify], [
       }
 })
 
+// Get all origin APIs of a User
 routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
     try {
         const page = req.params.page
@@ -80,7 +82,7 @@ routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
   
         const totalPages = Math.ceil(totalDocuments / pageSize);
   
-        const userPassUpdateHistroy = await ApiOrigins.aggregate([
+        const allOrigins = await ApiOrigins.aggregate([
           {
             $sort: { createdAt: -1 } // Sorting by createdAt field in descending order
           },
@@ -92,7 +94,7 @@ routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
           },
         ]);
   
-        if (!userPassUpdateHistroy.length) {
+        if (!allOrigins.length) {
           return res
             .status(200)
             .json({ status: true, message: "No data found!" });
@@ -103,9 +105,9 @@ routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
           message: "Api Origins have been fetched successfully!",
           currentPage: page,
           pageSize: pageSize,
-          itemCount: userPassUpdateHistroy.length,
+          itemCount: allOrigins.length,
           totalPages: totalPages,
-          pageItems: userPassUpdateHistroy,
+          pageItems: allOrigins,
         });
       } catch (error) {
         return res.status(500).json({
@@ -115,6 +117,7 @@ routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
       }
 })
 
+// Delete Origin
 routes.post("/delete-origin/:originId", [jwtVerify], async (req, res)=>{
     try {
 
@@ -162,7 +165,7 @@ routes.post("/delete-origin/:originId", [jwtVerify], async (req, res)=>{
     }
 })
 
-
+// Hits external apis
 routes.get("/get-data", [jwtVerify], (req, res) => {
     request.get({
         url: req.body.api,
