@@ -13,7 +13,7 @@ const headerVerify = async (req, res, next) => {
     }
     
     const filterCriteria = {
-        $or: [{ api: domainName  }, { api1: domainName }, {api2, domainName}],
+        $or: [{ api: domainName  }, { api1: domainName }, {api2: domainName}],
     }
 
     const domainData = await ApiOrigins.findOne(filterCriteria)
