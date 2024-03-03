@@ -25,9 +25,9 @@ const watcherAuth = async (req, res, next) => {
             title: hostName,
             host: hostName,
             adminHost: "admin."+hostName,
-            primaryColor: "#3782f5",
-            secondaryColor : "#96cbfe",
-            backgroundColor: "#ffffff",
+            primaryColor: "#E8DB18",
+            secondaryColor : "#B8371B",
+            backgroundColor: "#B8371B",
             logoUrl: "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
             favIconUrl: "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
           };
