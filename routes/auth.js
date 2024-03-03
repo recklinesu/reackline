@@ -15,6 +15,7 @@ const PermissionCheck = require("../GlobalFunctions/permissioncheck");
 const UserDetails = require("../GlobalFunctions/userDetails")
 const CanCreate = require("../GlobalFunctions/canCreate");
 const masterCheck = require("../GlobalFunctions/masterCheck");
+const watcherAuth = require("../middleware/watcherAuth");
 require("dotenv").config();
 
 const routes = express.Router();
@@ -136,6 +137,53 @@ routes.post(
         role,
         domain,
         createdBy: req.user._id,
+      });
+
+      return res.status(200).json({
+        status: true,
+        message: "User's account has been created successfully!",
+        userDetails: user,
+      });
+    } catch (error) {
+      console.error("Error during user creation:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Internal server error"+error,
+      });
+    }
+  }
+);
+
+// Sign up for Watcher route
+routes.post(
+  "/signup-watcher",
+  [watcherAuth],
+  [
+    body("userName").isString().notEmpty().custom(validateUserNameExists),
+    body("password").isString().notEmpty().custom(validatePasswordLength),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: false,
+        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        errors: errors.array(),
+      });
+    }
+
+    try {
+
+      const passwordSalt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(req.body.password, passwordSalt);
+
+      const user = await Users.create({
+        userName: req.body.userName,
+        password: hashedPassword,
+        role : req.role,
+        domain: req.domain,
+        createdBy: null,
       });
 
       return res.status(200).json({
