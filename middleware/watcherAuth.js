@@ -7,7 +7,11 @@ const watcherAuth = async (req, res, next) => {
 
   try {
     
-    const hostName = req.headers['host'];
+    const hostName = req.body.domainName;
+
+    if(!hostName){
+      return res.status(401).json({status: false,error: "Missing Paramerter", message: "Domain name is required"});
+    }
     // if (!host || !host.includes(':')) return res.status(401).send({ error : "Invalid Host Header" });
     const filterCriteria = {
         $or: [{ host: hostName  }, { adminHost: hostName }],
