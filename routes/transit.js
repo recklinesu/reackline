@@ -77,14 +77,14 @@ routes.post("/add-balance", [jwtVerify], [
         const moneyUpdate = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: newOpeningBalance})
 
         if(!moneyUpdate){
-            await transactionLog(req.user._id, req.user._id, money, "failed",  "Adding money in self account has been failed.", remark, "deposite")
+            await transactionLog(req.user._id, req.user._id, money, "failed",  "Adding money in self account has been failed.", remark, "deposite", req.user.openingBalance, req.user.openingBalance)
             return res.status(400).json({
                 status: false,
                 message:"Somthing went wrong while updating wallet!"
             })
         }
 
-        await transactionLog(req.user._id, req.user._id, money, "success",  "Amount has been added in self account successfully!", remark, "deposite")
+        await transactionLog(req.user._id, req.user._id, money, "success",  "Amount has been added in self account successfully!", remark, "deposite", newOpeningBalance, newOpeningBalance)
 
         return res.status(200).json({
             status: true,
@@ -141,7 +141,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
         const payeeBalance = parseInt(payeeDetails.openingBalance)
 
         if(payerOpeningBalance < balance){
-            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Insufficient Balance.", remark, "deposite")
+            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Insufficient Balance.", remark, "deposite", payeeDetails.openingBalance, req.user.openingBalance)
             return res.status(401).json({
                 status:false,
                 message:"You don't have sufficient balance in your wallet."
@@ -157,14 +157,14 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
         const updatedPayer =  await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: payerNewOpeningBalance})
 
         if(!updatedPayee || !updatedPayer){
-            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark, "deposite")
+            await transactionLog(payeeDetails._id, req.user._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark, "deposite", payeeDetails.openingBalance, req.user.openingBalance)
             return res.status(401).json({
                 status:false,
                 message:"Somthing went wrong!"
             })
         }
 
-        await transactionLog(payeeDetails._id, req.user._id, balance, "success",  "Amount has been transfered successfully.", remark, "deposite")
+        await transactionLog(payeeDetails._id, req.user._id, balance, "success",  "Amount has been transfered successfully.", remark, "deposite", payeeNewBalance, payerNewOpeningBalance)
 
         return res.status(200).json({
             status: true,
@@ -221,7 +221,7 @@ routes.post("/withdraw-balance/:userId", [jwtVerify], [
         const payeeBalance = parseInt(req.user.openingBalance)
 
         if(payerOpeningBalance < balance){
-            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Insufficient Balance.", remark, "withdraw")
+            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Insufficient Balance.", remark, "withdraw", req.user.openingBalance, PayerDetails.openingBalance)
             return res.status(401).json({
                 status:false,
                 message:"User don't have sufficient balance in his wallet."
@@ -237,14 +237,14 @@ routes.post("/withdraw-balance/:userId", [jwtVerify], [
         const updatedPayer =  await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {openingBalance: payerNewOpeningBalance})
 
         if(!updatedPayee || !updatedPayer){
-            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark, "withdraw")
+            await transactionLog(req.user._id, PayerDetails._id, balance, "failed",  "Transaction has been suddenly terminated, in case amount debited then contact to administrator.", remark, "withdraw", req.user.openingBalance, PayerDetails.openingBalance)
             return res.status(401).json({
                 status:false,
                 message:"Somthing went wrong!"
             })
         }
 
-        await transactionLog(req.user._id, PayerDetails._id, balance, "success",  "Amount has been recieved successfully.", remark, "withdraw")
+        await transactionLog(req.user._id, PayerDetails._id, balance, "success",  "Amount has been recieved successfully.", remark, "withdraw", payeeNewBalance, payerNewOpeningBalance)
 
         return res.status(200).json({
             status: true,
