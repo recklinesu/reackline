@@ -513,7 +513,7 @@ routes.post("/partnership-transactions/:page?/:pageSize?", [jwtVerify], [
 
 
 
-const transactionLog = async (payee, payer, amount, status, message, remark,transactionType)=>{
+const transactionLog = async (payee, payer, amount, status, message, remark,transactionType, openingBalancePayee, openingBalancePayer)=>{
     try {
         const logTransit = await Transactions.create({
             payee,
@@ -522,7 +522,9 @@ const transactionLog = async (payee, payer, amount, status, message, remark,tran
             message,
             status,
             remark,
-            transactionType
+            transactionType,
+            openingBalancePayee,
+            openingBalancePayer
         });
     } catch (error) {
         console.log(error.message);
