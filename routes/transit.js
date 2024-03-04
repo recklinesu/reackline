@@ -327,8 +327,8 @@ routes.post("/transactions/:page?/:pageSize?", [jwtVerify], [
 
 
         const transactions = await Transactions.find(filterCriteria)
-        .populate("payee", "userName name")
-        .populate("payer", "userName name").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
+        .populate("payee", "userName name openingBalance")
+        .populate("payer", "userName name openingBalance").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
 
         if(!transactions.length){
         return res.status(200).json({
