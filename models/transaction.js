@@ -13,6 +13,12 @@ const transitSchema = new mongoose.Schema({
     default: "failed",
     enum: ["success", "failed"],
   },
+  transactionType: {
+    type: String,
+    required: true,
+    default: "active",
+    enum: ["diposite", "withdraw"],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
