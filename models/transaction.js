@@ -13,12 +13,6 @@ const transitSchema = new mongoose.Schema({
     default: "failed",
     enum: ["success", "failed"],
   },
-  transactionType: {
-    type: String,
-    required: true,
-    default: "active",
-    enum: ["deposite", "withdraw"],
-  },
   openingBalancePayee:{ type: Number, default: 0, required: false },
   openingBalancePayer:{ type: Number, default: 0, required: false },
   createdAt: { type: Date, default: Date.now },
