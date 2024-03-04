@@ -17,7 +17,7 @@ const transitSchema = new mongoose.Schema({
     type: String,
     required: true,
     default: "active",
-    enum: ["diposite", "withdraw"],
+    enum: ["deposite", "withdraw"],
   },
   createdAt: { type: Date, default: Date.now },
 });
