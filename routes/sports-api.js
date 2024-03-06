@@ -204,7 +204,7 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
@@ -236,7 +236,7 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
@@ -267,7 +267,7 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
@@ -298,7 +298,7 @@ routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
@@ -315,35 +315,35 @@ routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
     }
 });
 
-// Fetch matches scores via match ids
-routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
-    try {
+// // Fetch matches scores via match ids
+// routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
+//     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v1/score?match_id="+req.params.match_id;
+//         const api = process.env.APP_SPORTS_URL+"api/v1/score?match_id="+req.params.match_id;
 
-        request.get({
-            url: api,
-            forever: false
-        }, function(error, response, body) {
-            if (!error && response.statusCode === 200) {
-                res.status(200).json({
-                    status: true,
-                    message: "Data has been fetched successfully!",
-                    data: body
-                });
-            } else {
-                res.status(500).json({
-                    status: false,
-                    message: "Internal error!"
-                }); 
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: false,
-            message: "Internal error!"
-        }); 
-    }
-});
+//         request.get({
+//             url: api,
+//             forever: false
+//         }, function(error, response, body) {
+//             if (!error && response.statusCode === 200) {
+//                 res.status(200).json({
+//                     status: true,
+//                     message: "Data has been fetched successfully!",
+//                     data: body
+//                 });
+//             } else {
+//                 res.status(500).json({
+//                     status: false,
+//                     message: "Internal error!"
+//                 }); 
+//             }
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             status: false,
+//             message: "Internal error!"
+//         }); 
+//     }
+// });
 
 module.exports = routes
