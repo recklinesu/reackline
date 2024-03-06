@@ -173,9 +173,9 @@ routes.get("/get-data", [jwtVerify], (req, res) => {
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
-            res.send(body);
+            res.status(200).send(body);
         } else {
-            res.send(body); 
+            res.status(500).send(body); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
         }
@@ -250,6 +250,37 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
     try {
 
         const api = process.env.APP_SPORTS_URL+"api/v1/fetch_data?Action=listEvents&EventTypeID="+req.params.event_id+"&CompetitionID="+req.params.compation_id;
+
+        request.get({
+            url: api,
+            forever: false
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                res.status(200).json({
+                    status: true,
+                    message: "Data has been fetched successfully!",
+                    data: body
+                });
+            } else {
+                res.status(500).json({
+                    status: false,
+                    message: "Internal error!"
+                }); 
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "Internal error!"
+        }); 
+    }
+});
+
+// Fetch matches scores via match ids
+routes.get("/fetch-matches-score/:match_id", [headerVerify], (req, res) => {
+    try {
+
+        const api = process.env.APP_SPORTS_URL+"api/v1/score?match_id="+req.params.match_id;
 
         request.get({
             url: api,
