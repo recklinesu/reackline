@@ -166,16 +166,24 @@ routes.post("/delete-origin/:originId", [jwtVerify], async (req, res)=>{
 })
 
 // Hits external apis
-routes.get("/get-data", [jwtVerify], (req, res) => {
+routes.get("/get-data", [jwtVerify], async (req, res) => {
     request.get({
         url: req.body.api,
         forever: false
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
-            res.status(200).send(body);
+            let data = JSON.parse(body);
+            res.status(200).json({
+                status:true,
+                message: "Data have been fetched successfully!",
+                data: data
+            });
         } else {
-            res.status(500).send(body); 
+            res.status(500).json({
+                status: false,
+                message: "Something went wrong! Please try again later.",
+            }); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
         }
