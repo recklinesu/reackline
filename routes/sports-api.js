@@ -329,7 +329,7 @@ routes.get("/fetch-markets/:match_id", [headerVerify], (req, res) => {
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
@@ -360,7 +360,7 @@ routes.get("/fetch-market-runner/:market_id", [headerVerify], (req, res) => {
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: body
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(500).json({
