@@ -377,4 +377,66 @@ routes.get("/fetch-market-runner/:market_id", [headerVerify], (req, res) => {
     }
 });
 
+// Fetch market odds of market
+routes.get("/fetch-market-odds/:market_id", [headerVerify], (req, res) => {
+    try {
+
+        const api = process.env.APP_SPORTS_URL+"api/v1/listMarketBookOdds?market_id="+req.params.market_id;
+
+        request.get({
+            url: api,
+            forever: false
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                res.status(200).json({
+                    status: true,
+                    message: "Data has been fetched successfully!",
+                    data: JSON.parse(body)
+                });
+            } else {
+                res.status(500).json({
+                    status: false,
+                    message: "Internal error!"
+                }); 
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "Internal error!"
+        }); 
+    }
+});
+
+// Fetch market session of market
+routes.get("/fetch-market-session/:market_id", [headerVerify], (req, res) => {
+    try {
+
+        const api = process.env.APP_SPORTS_URL+"api/v1/listMarketBookSession?match_id="+req.params.market_id;
+
+        request.get({
+            url: api,
+            forever: false
+        }, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
+                res.status(200).json({
+                    status: true,
+                    message: "Data has been fetched successfully!",
+                    data: JSON.parse(body)
+                });
+            } else {
+                res.status(500).json({
+                    status: false,
+                    message: "Internal error!"
+                }); 
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "Internal error!"
+        }); 
+    }
+});
+
 module.exports = routes
