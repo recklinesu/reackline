@@ -16,6 +16,7 @@ const UserDetails = require("../GlobalFunctions/userDetails")
 const CanCreate = require("../GlobalFunctions/canCreate");
 const masterCheck = require("../GlobalFunctions/masterCheck");
 const watcherAuth = require("../middleware/watcherAuth");
+const User = require("../models/user");
 require("dotenv").config();
 
 const routes = express.Router();
@@ -80,16 +81,16 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
 
     try {
 
-      const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+      const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
-      if(!masterChecked){
+      if (!masterChecked) {
         return res.status(401).send({
           status: false,
           message: "Invalid master password!",
@@ -160,7 +161,7 @@ routes.post(
       console.error("Error during user creation:", error);
       return res.status(500).json({
         status: false,
-        message: "Internal server error"+error,
+        message: "Internal server error" + error,
       });
     }
   }
@@ -180,7 +181,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -193,7 +194,7 @@ routes.post(
       const user = await Users.create({
         userName: req.body.userName,
         password: hashedPassword,
-        role : req.role,
+        role: req.role,
         domain: req.domain,
         createdBy: null,
         Watcher: null,
@@ -215,7 +216,7 @@ routes.post(
       console.error("Error during user creation:", error);
       return res.status(500).json({
         status: false,
-        message: "Internal server error"+error,
+        message: "Internal server error" + error,
       });
     }
   }
@@ -235,7 +236,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -297,13 +298,13 @@ routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
   try {
 
     const page = req.params.page
-        ? parseInt(req.params.page) < 1
-          ? 1
-          : parseInt(req.params.page)
-        : 1;
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), deleted:false});
+    const totalDocuments = await Users.countDocuments({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: false });
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -311,14 +312,14 @@ routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id)}).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({ createdBy: new mongoose.Types.ObjectId(req.user._id) }).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
 
-    if(!users.length){
+    if (!users.length) {
       return res.status(200).json({
         status: true,
         message: "No data found!"
       })
-    }else{
+    } else {
       return res.status(200).json({
         status: true,
         message: "Users fetched successfully!",
@@ -326,7 +327,7 @@ routes.get("/users/:page?/:pageSize?", [jwtVerify], async (req, res) => {
         pageSize: pageSize,
         itemCount: users.length,
         totalPages: totalPages,
-        pageItems:users
+        pageItems: users
       })
     }
 
@@ -344,13 +345,13 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
   try {
 
     const page = req.params.page
-        ? parseInt(req.params.page) < 1
-          ? 1
-          : parseInt(req.params.page)
-        : 1;
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.collection.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true});
+    const totalDocuments = await Users.collection.countDocuments({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true });
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -359,18 +360,18 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
     const users = await Users.collection.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), deleted: true })
-    .project({ deleted: 0})
-    .sort({ deletedAt: -1 })
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .toArray();
+      .project({ deleted: 0 })
+      .sort({ deletedAt: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .toArray();
 
-    if(!users.length){
+    if (!users.length) {
       return res.status(200).json({
         status: true,
         message: "No data found!"
       })
-    }else{
+    } else {
       return res.status(200).json({
         status: true,
         message: "Deleted Users fetched successfully!",
@@ -378,7 +379,7 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
         pageSize: pageSize,
         itemCount: users.length,
         totalPages: totalPages,
-        pageItems:users
+        pageItems: users
       })
     }
 
@@ -394,21 +395,21 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
 // delete users route with JWT verification
 routes.post("/delete-user/:userId?", [jwtVerify], [
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
-],async (req, res) => {
+], async (req, res) => {
 
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-      return res.status(400).json({
+    return res.status(400).json({
       status: false,
-      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+      message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
       errors: errors.array(),
-      });
+    });
   }
 
-  try{
+  try {
 
-    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
       return res.status(400).json({
         status: false,
         message: "Please provide a valid User ID."
@@ -424,23 +425,23 @@ routes.post("/delete-user/:userId?", [jwtVerify], [
       });
     }
 
-    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+    const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
-    if(!masterChecked){
+    if (!masterChecked) {
       return res.status(401).send({
         status: false,
         message: "Invalid master password!",
       });
     }
 
-    const  user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), {deleted: true, deletedAt: new Date()});
+    const user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), { deleted: true, deletedAt: new Date() });
 
-    if(user){
+    if (user) {
       return res.status(200).json({
         status: true,
         message: "User has been deleted successfully!",
       })
-    }else{
+    } else {
       return res.status(401).json({
         status: true,
         message: "Somthing went wrong!",
@@ -458,28 +459,28 @@ routes.post("/delete-user/:userId?", [jwtVerify], [
 // restore users route with JWT verification
 routes.post("/restore-user/:userId?", [jwtVerify], [
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
-],async (req, res) => {
+], async (req, res) => {
 
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-      return res.status(400).json({
+    return res.status(400).json({
       status: false,
-      message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+      message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
       errors: errors.array(),
-      });
+    });
   }
 
-  try{
+  try {
 
-    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
       return res.status(400).json({
         status: false,
         message: "Please provide a valid User ID."
       })
     }
 
-    const checkPermission = await Users.collection.findOne({_id: new mongoose.Types.ObjectId(req.params.userId)})
+    const checkPermission = await Users.collection.findOne({ _id: new mongoose.Types.ObjectId(req.params.userId) })
 
     if (!checkPermission || !checkPermission.createdBy.equals(req.user._id)) {
       return res.status(401).json({
@@ -488,23 +489,23 @@ routes.post("/restore-user/:userId?", [jwtVerify], [
       });
     }
 
-    const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+    const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
-    if(!masterChecked){
+    if (!masterChecked) {
       return res.status(401).send({
         status: false,
         message: "Invalid master password!",
       });
     }
 
-    const user = await Users.collection.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.params.userId)}, { $set: { deleted: false } }, { returnOriginal: false });
+    const user = await Users.collection.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(req.params.userId) }, { $set: { deleted: false } }, { returnOriginal: false });
 
-    if(user){
+    if (user) {
       return res.status(200).json({
         status: true,
         message: "User has been restored successfully!",
       })
-    }else{
+    } else {
       return res.status(401).json({
         status: true,
         message: "Somthing went wrong!",
@@ -525,7 +526,7 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
 
   try {
 
-    if(!mongoose.Types.ObjectId.isValid(req.params.userId)){
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
       return res.status(400).json({
         status: false,
         message: "Please provide a valid User ID."
@@ -533,13 +534,13 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
     }
 
     const page = req.params.page
-        ? parseInt(req.params.page) < 1
-          ? 1
-          : parseInt(req.params.page)
-        : 1;
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.params.userId), deleted:false});
+    const totalDocuments = await Users.countDocuments({ createdBy: new mongoose.Types.ObjectId(req.params.userId), deleted: false });
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -547,14 +548,14 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.params.userId)}).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({ createdBy: new mongoose.Types.ObjectId(req.params.userId) }).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
 
-    if(!users.length){
+    if (!users.length) {
       return res.status(200).json({
         status: true,
         message: "No data found!"
       })
-    }else{
+    } else {
       return res.status(200).json({
         status: true,
         message: "Users fetched successfully!",
@@ -562,7 +563,7 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
         pageSize: pageSize,
         itemCount: users.length,
         totalPages: totalPages,
-        pageItems:users
+        pageItems: users
       })
     }
 
@@ -579,7 +580,7 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
 
   try {
 
-    const checkParams = (value)=>{
+    const checkParams = (value) => {
       if (value === "active" || value === "suspend" || value === "locked") {
         return true;
       } else {
@@ -587,7 +588,7 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
       }
     }
 
-    if(!checkParams(req.params.status)){
+    if (!checkParams(req.params.status)) {
       return res.status(400).json({
         status: false,
         message: "The status could be either 'active', 'suspend' or 'locked'"
@@ -595,13 +596,13 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
     }
 
     const page = req.params.page
-        ? parseInt(req.params.page) < 1
-          ? 1
-          : parseInt(req.params.page)
-        : 1;
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status, deleted:false});
+    const totalDocuments = await Users.countDocuments({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status, deleted: false });
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -609,14 +610,14 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status}).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: req.params.status }).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
 
-    if(!users.length){
+    if (!users.length) {
       return res.status(200).json({
         status: true,
         message: "No data found!"
       })
-    }else{
+    } else {
       return res.status(200).json({
         status: true,
         message: "Users fetched successfully!",
@@ -624,7 +625,7 @@ routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, 
         pageSize: pageSize,
         itemCount: users.length,
         totalPages: totalPages,
-        pageItems:users
+        pageItems: users
       })
     }
 
@@ -643,7 +644,7 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
 
     const checkRole = await Roles.findOne(new mongoose.Types.ObjectId(req.params.roleId))
 
-    if(!checkRole){
+    if (!checkRole) {
       return res.status(400).json({
         status: false,
         message: "Invalid Role ID!"
@@ -651,13 +652,13 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
     }
 
     const page = req.params.page
-        ? parseInt(req.params.page) < 1
-          ? 1
-          : parseInt(req.params.page)
-        : 1;
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
     const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
-    const totalDocuments = await Users.countDocuments({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId), deleted:false});
+    const totalDocuments = await Users.countDocuments({ createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId), deleted: false });
 
     const remainingPages = Math.ceil(
       (totalDocuments - (page - 1) * pageSize) / pageSize
@@ -665,14 +666,14 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
-    const users = await Users.find({createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId)}).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+    const users = await Users.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), role: new mongoose.Types.ObjectId(req.params.roleId) }).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
 
-    if(!users.length){
+    if (!users.length) {
       return res.status(200).json({
         status: true,
         message: "No data found!"
       })
-    }else{
+    } else {
       return res.status(200).json({
         status: true,
         message: "Users fetched successfully!",
@@ -680,7 +681,7 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
         pageSize: pageSize,
         itemCount: users.length,
         totalPages: totalPages,
-        pageItems:users
+        pageItems: users
       })
     }
 
@@ -707,7 +708,7 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
@@ -836,7 +837,7 @@ routes.post(
           );
         }
       }),
-      body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
+    body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
   ],
   [jwtVerify],
   async (req, res) => {
@@ -845,16 +846,16 @@ routes.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({
         status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+        message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
         errors: errors.array(),
       });
     }
 
     try {
 
-      const masterChecked = await masterCheck(req.user._id,req.body.masterPassword)
+      const masterChecked = await masterCheck(req.user._id, req.body.masterPassword)
 
-      if(!masterChecked){
+      if (!masterChecked) {
         return res.status(401).send({
           status: false,
           message: "Invalid master password!",
@@ -890,33 +891,60 @@ routes.post(
 
       if (req.params.userId) {
         // History
-        if(req.body.creditReference){
+        if (req.body.creditReference) {
           const userdetailscredit = await UserDetails(req.params.userId);
           await transactionLogCredit(req.user._id, req.params.userId, userdetailscredit.creditReference, parseInt(req.body.creditReference))
         }
 
-        if(req.body.partnership){
+        if (req.body.partnership) {
           const userdetailscredit = await UserDetails(req.params.userId);
           await transactionLogPartnerShip(req.user._id, req.params.userId, userdetailscredit.partnership, parseInt(req.body.partnership))
         }
-        
-        // Update
+
+        const getThis = await UserDetails(req.params.userId)
+        let filterCriteria = null;
+
+        if (getThis.role.name === "Watcher") {
+          filterCriteria = { Watcher: getThis._id }
+        } else if (getThis.role.name === "Declare") {
+          filterCriteria = { Declare: getThis._id }
+        } else if (getThis.role.name === "Creater") {
+          filterCriteria = { Creater: getThis._id }
+        } else if (getThis.role.name === "WhiteLabel") {
+          filterCriteria = { WhiteLabel: getThis._id }
+        } else if (getThis.role.name === "Super") {
+          filterCriteria = { Super: getThis._id }
+        } else if (getThis.role.name === "Master") {
+          filterCriteria = { Master: getThis._id }
+        } else if (getThis.role.name === "Agent") {
+          filterCriteria = { Agent: getThis._id }
+        } else if (getThis.role.name === "User") {
+          filterCriteria = { User: getThis._id }
+        } else {
+          filterCriteria = null
+        }
+
+        // Update status with condition for others
+        if (req.body.status) {
+          updatedUserDetails = await Users.updateMany(filterCriteria, { status: req.body.status })
+        }
+
         updatedUserDetails = await Users.findByIdAndUpdate(
           new mongoose.Types.ObjectId(req.params.userId),
           body
         );
       } else {
         // History
-        if(req.body.creditReference){
+        if (req.body.creditReference) {
           await transactionLogCredit(req.user._id, req.user._id, req.user.creditReference, parseInt(req.body.creditReference))
         }
 
-        if(req.body.partnership){
+        if (req.body.partnership) {
           await transactionLogPartnerShip(req.user._id, req.user._id, req.user.partnership, parseInt(req.body.partnership))
         }
 
 
-        
+
         // Update
         updatedUserDetails = await Users.findByIdAndUpdate(
           new mongoose.Types.ObjectId(req.user._id),
@@ -935,7 +963,7 @@ routes.post(
         status: true,
         message: "User details has been updated successfully!",
         updatedParams: body
-        
+
       });
     } catch (error) {
       return res.status(500).json({
@@ -1035,12 +1063,12 @@ routes.get(
 );
 
 // get my details
-routes.get("/letest-user-details", [jwtVerify], async(req,res)=>{
+routes.get("/letest-user-details", [jwtVerify], async (req, res) => {
   try {
     const user = await UserDetails(req.user._id)
 
     return res.status(200).json({
-      status:true,
+      status: true,
       message: "User's letest details fetched successfully!",
       user
     })
@@ -1072,29 +1100,29 @@ const updateHistoryOfPassword = async (updatedOf, updatedBy) => {
   }
 };
 
-const transactionLogCredit = async (from, of, oldCredit, newCredit)=>{
+const transactionLogCredit = async (from, of, oldCredit, newCredit) => {
   try {
-      const logTransit = await CreditTransaction.create({
-          from,
-          of,
-          oldCredit,
-          newCredit
-      });
+    const logTransit = await CreditTransaction.create({
+      from,
+      of,
+      oldCredit,
+      newCredit
+    });
   } catch (error) {
-      console.log(error.message);
+    console.log(error.message);
   }
 }
 
-const transactionLogPartnerShip = async (from, of, oldPartnership, newPartnership)=>{
+const transactionLogPartnerShip = async (from, of, oldPartnership, newPartnership) => {
   try {
-      const logTransit = await PartnershipTransaction.create({
-          from,
-          of,
-          oldPartnership,
-          newPartnership
-      });
+    const logTransit = await PartnershipTransaction.create({
+      from,
+      of,
+      oldPartnership,
+      newPartnership
+    });
   } catch (error) {
-      console.log(error.message);
+    console.log(error.message);
   }
 }
 
