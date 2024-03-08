@@ -10,6 +10,7 @@ const PartnershipTransaction = require("../models/partnershipTransaction");
 const PassowordHistory = require("../models/passwordHistory");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
+const suspendVerify = require("../middleware/suspendAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck");
 const UserDetails = require("../GlobalFunctions/userDetails")
@@ -59,7 +60,7 @@ const validateRolelExists = async (value) => {
 // Sign up route
 routes.post(
   "/signup",
-  [jwtVerify],
+  [jwtVerify, suspendVerify],
   [
     body("name").optional().isString(),
     body("currency").optional().isString(),
@@ -393,7 +394,7 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
 
 
 // delete users route with JWT verification
-routes.post("/delete-user/:userId?", [jwtVerify], [
+routes.post("/delete-user/:userId?", [jwtVerify, suspendVerify], [
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
 
@@ -457,7 +458,7 @@ routes.post("/delete-user/:userId?", [jwtVerify], [
 });
 
 // restore users route with JWT verification
-routes.post("/restore-user/:userId?", [jwtVerify], [
+routes.post("/restore-user/:userId?", [jwtVerify, suspendVerify], [
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
 
@@ -696,7 +697,7 @@ routes.get("/users-by-role/:roleId/:page?/:pageSize?", jwtVerify, async (req, re
 // update user's password route with JWT verification
 routes.post(
   "/update-password/:userId?",
-  [jwtVerify],
+  [jwtVerify, suspendVerify],
   [
     body("currentPassword").custom(validatePasswordLength),
     body("newPassword").custom(validatePasswordLength),
@@ -839,7 +840,7 @@ routes.post(
       }),
     body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
   ],
-  [jwtVerify],
+  [jwtVerify, suspendVerify],
   async (req, res) => {
     const errors = validationResult(req);
 

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
 const request = require('request');
 const jwtVerify = require("../middleware/jwtAuth");
+const suspendVerify = require("../middleware/jwtAuth");
 const headerVerify = require("../middleware/headerAuth");
 const ApiOrigins = require("../models/apiOrigin");
 const routePermissions = require("../GlobalFunctions/routePermission");
@@ -12,7 +13,7 @@ require("dotenv").config();
 const routes = express.Router();
 
 // Create  a new API Origin
-routes.post("/create-origin", [jwtVerify], [
+routes.post("/create-origin", [jwtVerify, suspendVerify], [
     body("api").notEmpty().custom(async (e)=>{
         const check = await ApiOrigins.findOne({api: e})
         if(check){
@@ -118,7 +119,7 @@ routes.get("/get-origin/:page?/:pageSize?", [jwtVerify], async (req, res)=>{
 })
 
 // Delete Origin
-routes.post("/delete-origin/:originId", [jwtVerify], async (req, res)=>{
+routes.post("/delete-origin/:originId", [jwtVerify, suspendVerify], async (req, res)=>{
     try {
 
         const routePermission = await routePermissions(req.user._id, ["Watcher"])

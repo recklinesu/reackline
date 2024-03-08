@@ -2,66 +2,67 @@ const express = require("express")
 const { body, validationResult, check } = require("express-validator");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
+const suspendVerify = require("../middleware/jwtAuth");
 const routePermissions = require("../GlobalFunctions/routePermission");
 require("dotenv").config();
 
 const routes = express.Router();
 
-routes.post("/create-new-role", jwtVerify,[
-    body("name").isLength({min:3}).custom(async (e)=>{
-        const role = await Roles.findOne({name: e})
-        console.log(role);
-        if (role) throw new Error('Role already exists');
-    }),
-], async(req,res)=>{
+// routes.post("/create-new-role", jwtVerify,[
+//     body("name").isLength({min:3}).custom(async (e)=>{
+//         const role = await Roles.findOne({name: e})
+//         console.log(role);
+//         if (role) throw new Error('Role already exists');
+//     }),
+// ], async(req,res)=>{
 
-    const errors = validationResult(req);
+//     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-        status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
-        errors: errors.array(),
-        });
-    }
+//     if (!errors.isEmpty()) {
+//         return res.status(400).json({
+//         status: false,
+//         message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
+//         errors: errors.array(),
+//         });
+//     }
 
-    try {
+//     try {
 
-        const checkPermission = await routePermissions(req.user._id, ["Watcher"])
+//         const checkPermission = await routePermissions(req.user._id, ["Watcher"])
 
-        if(!checkPermission){
-            return res.status(500).json({
-                status: false,
-                message: "This user is not allowed for the following task.",
-            });
-        }
+//         if(!checkPermission){
+//             return res.status(500).json({
+//                 status: false,
+//                 message: "This user is not allowed for the following task.",
+//             });
+//         }
         
-        const roles = await Roles.create({
-            name:req.body.name,
-            canWatcher:req.body.canWatcher??false,
-            canDeclare:req.body.canDeclare??false,
-            canCreater:req.body.canCreater??false,
-            canWhiteLabel:req.body.canWhiteLabel??false,
-            canSuper:req.body.canSuper??false,
-            canMaster:req.body.canMaster??false,
-            canAgent:req.body.canAgent??false,
-            canUser:req.body.canUser??false,
-        })
+//         const roles = await Roles.create({
+//             name:req.body.name,
+//             canWatcher:req.body.canWatcher??false,
+//             canDeclare:req.body.canDeclare??false,
+//             canCreater:req.body.canCreater??false,
+//             canWhiteLabel:req.body.canWhiteLabel??false,
+//             canSuper:req.body.canSuper??false,
+//             canMaster:req.body.canMaster??false,
+//             canAgent:req.body.canAgent??false,
+//             canUser:req.body.canUser??false,
+//         })
 
-        return res.status(200).json({
-            status: true,
-            message: "New role has been created successfully successfully!",
-            roles
-        });
+//         return res.status(200).json({
+//             status: true,
+//             message: "New role has been created successfully successfully!",
+//             roles
+//         });
         
-    } catch (error) {
-        return res.status(500).json({
-            status: false,
-            message: "Internal server error : "+error,
-        });
-    }
+//     } catch (error) {
+//         return res.status(500).json({
+//             status: false,
+//             message: "Internal server error : "+error,
+//         });
+//     }
 
-});
+// });
 
 routes.get("/get-roles/:roleName?", jwtVerify, async (req, res) =>{
     try {
@@ -104,7 +105,7 @@ routes.get("/get-roles/:roleName?", jwtVerify, async (req, res) =>{
     }
 })
 
-routes.post("/update-role-permissions", jwtVerify,[
+routes.post("/update-role-permissions", [jwtVerify, suspendVerify],[
     body("roleId").notEmpty(),
     body("canWatcher").isBoolean().withMessage("This value either could be 'true' or 'false'"),
     body("canDeclare").isBoolean().withMessage("This value either could be 'true' or 'false'"),

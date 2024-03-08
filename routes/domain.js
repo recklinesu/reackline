@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator");
 const Domain = require("../models/domain");
 const mongoose = require("mongoose");
 const jwtVerify = require("../middleware/jwtAuth");
+const suspendVerify = require("../middleware/jwtAuth");
 const routePermissions = require("../GlobalFunctions/routePermission");
 const masterCheck = require("../GlobalFunctions/masterCheck");
 require("dotenv").config();
@@ -24,7 +25,7 @@ const validatePasswordLength = (value, name) => {
 
 
 // Create New Site
-routes.post("/create-domain", [jwtVerify] , [
+routes.post("/create-domain", [jwtVerify, suspendVerify] , [
   body("title").notEmpty().withMessage("title is required"),
   body("host").notEmpty().withMessage("host is required").custom(async(data, body)=>{
     const domain = await Domain.findOne({host: body.req.body.host})
@@ -108,7 +109,7 @@ routes.post("/create-domain", [jwtVerify] , [
 
 // Update Site details by id
 
-routes.post("/update-domain/:domainId", [jwtVerify] , [
+routes.post("/update-domain/:domainId", [jwtVerify, suspendVerify] , [
   body("title").optional().notEmpty().withMessage("title is required"),
   body("primaryColor").optional().notEmpty().withMessage("primaryColor is required"),
   body("secondaryColor").optional().notEmpty().withMessage("secondaryColor is required"),
@@ -198,7 +199,7 @@ routes.post("/update-domain/:domainId", [jwtVerify] , [
 
 
 // Delete Site Details by ID
-routes.post("/delete-domain/:domainId", [jwtVerify] ,[
+routes.post("/delete-domain/:domainId", [jwtVerify, suspendVerify] ,[
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
 

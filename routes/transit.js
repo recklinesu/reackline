@@ -11,6 +11,7 @@ const Transactions = require("../models/transaction")
 const CreditTransaction = require("../models/creaditReferenceTransaction");
 const PartnershipTransaction = require("../models/partnershipTransaction");
 const jwtVerify = require("../middleware/jwtAuth");
+const suspendVerify = require("../middleware/jwtAuth");
 const domainCheck = require("../middleware/domainCheck");
 const PermissionCheck = require("../GlobalFunctions/permissioncheck");
 const UserDetails = require("../GlobalFunctions/userDetails")
@@ -36,7 +37,7 @@ const validatePasswordLength = (value, name) => {
   };
 
 // add money  to user wallet
-routes.post("/add-balance", [jwtVerify], [
+routes.post("/add-balance", [jwtVerify, suspendVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
     body("remark").optional().isString(),
@@ -100,7 +101,7 @@ routes.post("/add-balance", [jwtVerify], [
 })
 
 // transfer money  to user wallet
-routes.post("/transfer-balance/:userId", [jwtVerify], [
+routes.post("/transfer-balance/:userId", [jwtVerify, suspendVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
     body("remark").optional().isString(),
@@ -180,7 +181,7 @@ routes.post("/transfer-balance/:userId", [jwtVerify], [
 })
 
 // Withdraw money  to user wallet
-routes.post("/withdraw-balance/:userId", [jwtVerify], [
+routes.post("/withdraw-balance/:userId", [jwtVerify, suspendVerify], [
 
     body("balance").isNumeric().withMessage("Please provide valid  amount.").notEmpty().withMessage("Please provide valid  amount."),
     body("remark").optional().isString(),
