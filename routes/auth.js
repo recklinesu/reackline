@@ -123,7 +123,7 @@ routes.post(
       const passwordSalt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, passwordSalt);
 
-      const user = await Users.create({
+      let prepareData = {
         name,
         userName,
         commission,
@@ -137,7 +137,19 @@ routes.post(
         role,
         domain,
         createdBy: req.user._id,
-      });
+        Watcher: req.user.Watcher,
+        Declare: req.user.Declare,
+        Creater: req.user.Creater,
+        WhiteLabel: req.user.WhiteLabel,
+        Super: req.user.Super,
+        Master: req.user.Master,
+        Agent: req.user.Agent,
+        User: req.user.User,
+      }
+
+      prepareData[req.user.role.name] = req.user._id
+
+      const user = await Users.create(prepareData);
 
       return res.status(200).json({
         status: true,
@@ -184,6 +196,14 @@ routes.post(
         role : req.role,
         domain: req.domain,
         createdBy: null,
+        Watcher: null,
+        Declare: null,
+        Creater: null,
+        WhiteLabel: null,
+        Super: null,
+        Master: null,
+        Agent: null,
+        User: null,
       });
 
       return res.status(200).json({
