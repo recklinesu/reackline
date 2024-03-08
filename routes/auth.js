@@ -255,7 +255,7 @@ routes.post(
         });
       }
 
-      if (user.status !== "active") {
+      if (user.status === "locked") {
         return res.status(401).json({
           status: false,
           message: "This user's profile is " + user.status,
