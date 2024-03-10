@@ -824,8 +824,7 @@ routes.post(
     body("mobile")
       .optional()
       .isNumeric()
-      .isLength({ min: 10 })
-      .withMessage("mobile can be only typeOf numeric value"),
+      .isLength({ min: 10 }),
     body("role").optional().custom(validateRolelExists),
     body("status")
       .optional()
