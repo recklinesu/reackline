@@ -7,6 +7,7 @@ const aes256 = require("aes256");
 const Users = require("../models/user");
 const CreditTransaction = require("../models/creaditReferenceTransaction");
 const PartnershipTransaction = require("../models/partnershipTransaction");
+const Transactions = require("../models/transaction")
 const PassowordHistory = require("../models/passwordHistory");
 const Roles = require("../models/roles");
 const jwtVerify = require("../middleware/jwtAuth");
@@ -107,6 +108,17 @@ routes.post(
         });
       }
 
+      if(req.body.openingBalance){
+        const num1 = req.body.openingBalance;
+        const num2 = req.user.openingBalance
+        if(num1 > num2){
+          return res.status(401).send({
+            status: false,
+            message: "You don't have enought balance in your account, Please add more money.",
+          });
+        }
+      }
+
       const {
         name,
         userName,
@@ -151,7 +163,15 @@ routes.post(
 
       prepareData[req.user.role.name] = req.user._id
 
+      const num1 = req.body.openingBalance;
+      const num2 = req.user.openingBalance
+      const newOpeningBalance = num2-num1;
+
+      const deductBalance = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id), {openingBalance: newOpeningBalance})
+
       const user = await Users.create(prepareData);
+
+      await transactionLog(user._id, req.user._id, req.body.openingBalance, "success",  "Amount has been transfered successfully.", "Added first transaction by upline", req.body.openingBalance, newOpeningBalance)
 
       return res.status(200).json({
         status: true,
@@ -1149,6 +1169,23 @@ const transactionLogPartnerShip = async (from, of, oldPartnership, newPartnershi
     });
   } catch (error) {
     console.log(error.message);
+  }
+}
+
+const transactionLog = async (payee, payer, amount, status, message, remark, openingBalancePayee, openingBalancePayer)=>{
+  try {
+      const logTransit = await Transactions.create({
+          payee,
+          payer,
+          amount,
+          message,
+          status,
+          remark,
+          openingBalancePayee,
+          openingBalancePayer
+      });
+  } catch (error) {
+      console.log(error.message);
   }
 }
 
