@@ -627,7 +627,7 @@ routes.post("/domain/notice/delete/:noticeId", [jwtVerify], async (req, res) => 
 })
 
 // Get Banner
-routes.get("/domain/banner/get", [jwtVerify], async (req, res) => {
+routes.get("/domain/banner/get/:domain", [jwtVerify], async (req, res) => {
   try {
 
     const routePermission = await routePermissions(req.user._id, ["Watcher","Creater"])
@@ -639,7 +639,7 @@ routes.get("/domain/banner/get", [jwtVerify], async (req, res) => {
       });
     }
 
-    const data = await Banner.find({domain: new mongoose.Types.ObjectId(req.user.domain)})
+    const data = await Banner.find({domain: new mongoose.Types.ObjectId(req.params.domain)})
 
     return res.status(200).json({
       status: true,
@@ -656,19 +656,10 @@ routes.get("/domain/banner/get", [jwtVerify], async (req, res) => {
 })
 
 // Get Notice
-routes.get("/domain/notice/get", [jwtVerify], async (req, res) => {
+routes.get("/domain/notice/get/:domain", [jwtVerify], async (req, res) => {
   try {
 
-    const routePermission = await routePermissions(req.user._id, ["Watcher","Creater"])
-
-    if (!routePermission) {
-      return res.status(401).json({
-        status: false,
-        message: "This user is not allowed for the following task.",
-      });
-    }
-
-    const data = await Notice.find({domain: new mongoose.Types.ObjectId(req.user.domain)})
+    const data = await Notice.find({domain: new mongoose.Types.ObjectId(req.params.domain)})
 
     return res.status(200).json({
       status: true,
