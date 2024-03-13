@@ -244,7 +244,7 @@ routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res)
                 res.status(200).json({
                     status: true,
                     message: "Data has been fetched successfully!",
-                    data: JSON.parse(JSON.parse(body))
+                    data: JSON.parse(body)
                 });
             } else {
                 res.status(400).json({
