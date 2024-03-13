@@ -251,7 +251,7 @@ routes.get("/fetch-market-odds/:evennt_id/:market_id", [headerVerify], (req, res
     } catch (error) {
         res.status(500).json({
             status: false,
-            message: "Internal error!"
+            message: "Internal error!c"
         }); 
     }
 });
