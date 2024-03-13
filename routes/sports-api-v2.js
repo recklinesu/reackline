@@ -30,8 +30,7 @@ routes.get("/get-data", [jwtVerify], async (req, res) => {
             res.status(500).json({
                 status: false,
                 message: "Something went wrong! Please try again later.",
-                body,
-                data: 
+                body
             }); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
@@ -88,8 +87,7 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({,
-                    data: 
+                res.status(500).json({
                     status: false,
                     message: "Internal error!"
                 }); 
@@ -247,12 +245,11 @@ routes.get("/fetch-market-odds/:evennt_id/:market_id", [headerVerify], (req, res
                 res.status(500).json({
                     status: false,
                     message: "Internal error!",
-                    data: JSON.parse(body)
+                    body: JSON.parse(body)
                 }); 
             }
         });
-    } catch (error) {,
-        data: 
+    } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
