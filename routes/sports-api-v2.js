@@ -276,7 +276,8 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
             } else {
                 res.status(500).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Internal error!",
+                    body: JSON.parse(body)
                 }); 
             }
         });
@@ -307,7 +308,8 @@ routes.get("/fetch-bookmarker/:event_id/:matche_id", [headerVerify], (req, res) 
             } else {
                 res.status(500).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Internal error!",
+                    body: JSON.parse(body)
                 }); 
             }
         });
@@ -338,7 +340,8 @@ routes.get("/fetch-bookmarker-odds/:evennt_id/:market_id", [headerVerify], (req,
             } else {
                 res.status(500).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Internal error!",
+                    body: JSON.parse(body)
                 }); 
             }
         });
