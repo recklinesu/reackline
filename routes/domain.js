@@ -630,12 +630,10 @@ routes.post("/domain/notice/delete/:noticeId", [jwtVerify], async (req, res) => 
 routes.get("/domain/banner/get/:domain", async (req, res) => {
   try {
 
-    const routePermission = await routePermissions(req.user._id, ["Watcher","Creater"])
-
-    if (!routePermission) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.domain)) {
       return res.status(401).json({
         status: false,
-        message: "This user is not allowed for the following task.",
+        message: "Invalid Domain Id!",
       });
     }
 
@@ -658,6 +656,13 @@ routes.get("/domain/banner/get/:domain", async (req, res) => {
 // Get Notice
 routes.get("/domain/notice/get/:domain", async (req, res) => {
   try {
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.bannerId)) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid Domain Id!",
+      });
+    }
 
     const data = await Notice.find({domain: new mongoose.Types.ObjectId(req.params.domain)})
 
