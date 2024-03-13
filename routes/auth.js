@@ -622,6 +622,67 @@ routes.get("/users-by-userid/:userId/:page?/:pageSize?", jwtVerify, async (req, 
   }
 });
 
+// Search users by username
+routes.get("/users-search/:page?/:pageSize?", jwtVerify, [
+  body("username").notEmpty().withMessage("Username is required")
+],async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: false,
+      message: errors.array()[0]['path'] + " : " + errors.array()[0]['msg'],
+      errors: errors.array(),
+    });
+  }
+
+  try {
+
+    const page = req.params.page
+      ? parseInt(req.params.page) < 1
+        ? 1
+        : parseInt(req.params.page)
+      : 1;
+    const pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+    const usernameRegex = new RegExp(req.body.username, "i"); // Creating a case-insensitive regex for the username
+
+    const totalDocuments = await Users.countDocuments({ userName: {$regex: usernameRegex}, deleted: false });
+
+    const remainingPages = Math.ceil(
+      (totalDocuments - (page - 1) * pageSize) / pageSize
+    );
+
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
+    const users = await Users.find({ userName: {$regex: usernameRegex} }).populate(["role"]).populate("domain", "_id title host").sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
+
+    if (!users.length) {
+      return res.status(200).json({
+        status: true,
+        message: "No data found!"
+      })
+    } else {
+      return res.status(200).json({
+        status: true,
+        message: "Users fetched successfully!",
+        currentPage: page,
+        pageSize: pageSize,
+        itemCount: users.length,
+        totalPages: totalPages,
+        pageItems: users
+      })
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error" + error,
+    });
+  }
+});
+
 // Get users by status
 routes.get("/users-by-status/:status/:page?/:pageSize?", jwtVerify, async (req, res) => {
 
