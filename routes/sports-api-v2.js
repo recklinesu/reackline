@@ -231,7 +231,7 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
 // });
 
 // Fetch market odds of market
-routes.get("/fetch-market-odds/:evennt_id/:market_id", [headerVerify], (req, res) => {
+routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL+"api/v2/getMarketsOdds?EventTypeID="+req.params.event_id+"&marketId="+req.params.market_id;
@@ -295,10 +295,10 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
 });
 
 // Fetch bookmarker of market
-routes.get("/fetch-bookmarker/:event_id/:matche_id", [headerVerify], (req, res) => {
+routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getBookmakers?EventTypeID="+req.params.market_id+"&EventID=33068371"+req.params.match_id;
+        const api = process.env.APP_SPORTS_URL+"api/v2/getBookmakers?EventTypeID="+req.params.event_id+"&EventID="+req.params.match_id;
 
         request.get({
             url: api,
@@ -327,7 +327,7 @@ routes.get("/fetch-bookmarker/:event_id/:matche_id", [headerVerify], (req, res) 
 });
 
 // Fetch bookmarker odds of market
-routes.get("/fetch-bookmarker-odds/:evennt_id/:market_id", [headerVerify], (req, res) => {
+routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL+"api/v2/getBookmakerOdds?EventTypeID="+req.params.event_id+"&marketId="+req.params.market_id;
