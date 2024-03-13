@@ -15,8 +15,8 @@ const routesInit = (app)=>{
     app.use("/api/auth", require("./routes/auth"));
     app.use("/api/transit", require("./routes/transit"));
     app.use("/api/settings", require("./routes/roles"));
-    app.use("/api/v1/", require("./routes/sports-api"));
-    app.use("/api/v2/", require("./routes/sports-api"));
+    app.use("/api/v1/", require("./routes/sports-api-v1"));
+    app.use("/api/v2/", require("./routes/sports-api-v2"));
 
 }
 
