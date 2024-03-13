@@ -627,7 +627,7 @@ routes.post("/domain/notice/delete/:noticeId", [jwtVerify], async (req, res) => 
 })
 
 // Get Banner
-routes.get("/domain/banner/get/:domain", [jwtVerify], async (req, res) => {
+routes.get("/domain/banner/get/:domain", async (req, res) => {
   try {
 
     const routePermission = await routePermissions(req.user._id, ["Watcher","Creater"])
@@ -656,7 +656,7 @@ routes.get("/domain/banner/get/:domain", [jwtVerify], async (req, res) => {
 })
 
 // Get Notice
-routes.get("/domain/notice/get/:domain", [jwtVerify], async (req, res) => {
+routes.get("/domain/notice/get/:domain", async (req, res) => {
   try {
 
     const data = await Notice.find({domain: new mongoose.Types.ObjectId(req.params.domain)})
