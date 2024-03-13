@@ -657,7 +657,7 @@ routes.get("/domain/banner/get/:domain", async (req, res) => {
 routes.get("/domain/notice/get/:domain", async (req, res) => {
   try {
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.bannerId)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.domain)) {
       return res.status(401).json({
         status: false,
         message: "Invalid Domain Id!",
