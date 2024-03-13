@@ -27,7 +27,7 @@ routes.get("/get-data", [jwtVerify], async (req, res) => {
                 data: JSON.parse(body)
             });
         } else {
-            res.status(500).json({
+            res.status(400).json({
                 status: false,
                 message: "Something went wrong! Please try again later.",
                 body: JSON.parse(body),
@@ -55,9 +55,10 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -87,9 +88,10 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -118,9 +120,10 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -149,9 +152,10 @@ routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -180,9 +184,10 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!"
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -242,10 +247,10 @@ routes.get("/fetch-market-odds/:evennt_id/:market_id", [headerVerify], (req, res
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!",
-                    body: JSON.parse(body)
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -274,10 +279,10 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!",
-                    body: JSON.parse(body)
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -306,10 +311,10 @@ routes.get("/fetch-bookmarker/:event_id/:matche_id", [headerVerify], (req, res) 
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!",
-                    body: JSON.parse(body)
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
@@ -338,10 +343,10 @@ routes.get("/fetch-bookmarker-odds/:evennt_id/:market_id", [headerVerify], (req,
                     data: JSON.parse(body)
                 });
             } else {
-                res.status(500).json({
+                res.status(400).json({
                     status: false,
-                    message: "Internal error!",
-                    body: JSON.parse(body)
+                    message: "Something went wrong! Please try again later.",
+                    body: JSON.parse(body),
                 }); 
             }
         });
