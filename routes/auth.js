@@ -394,7 +394,7 @@ routes.get("/deleted-users/:page?/:pageSize?", [jwtVerify], async (req, res) => 
 
 
 // delete users route with JWT verification
-routes.post("/delete-user/:userId?", [jwtVerify, suspendVerify], [
+routes.post("/delete-user/:userId", [jwtVerify, suspendVerify], [
   body("masterPassword").isString().notEmpty().custom(validatePasswordLength),
 ], async (req, res) => {
 
@@ -434,6 +434,32 @@ routes.post("/delete-user/:userId?", [jwtVerify, suspendVerify], [
         message: "Invalid master password!",
       });
     }
+
+    const getThis = await UserDetails(req.params.userId)
+    let filterCriteria = null;
+
+    if (getThis.role.name === "Watcher") {
+      filterCriteria = { Watcher: getThis._id }
+    } else if (getThis.role.name === "Declare") {
+      filterCriteria = { Declare: getThis._id }
+    } else if (getThis.role.name === "Creater") {
+      filterCriteria = { Creater: getThis._id }
+    } else if (getThis.role.name === "WhiteLabel") {
+      filterCriteria = { WhiteLabel: getThis._id }
+    } else if (getThis.role.name === "Super") {
+      filterCriteria = { Super: getThis._id }
+    } else if (getThis.role.name === "Master") {
+      filterCriteria = { Master: getThis._id }
+    } else if (getThis.role.name === "Agent") {
+      filterCriteria = { Agent: getThis._id }
+    } else if (getThis.role.name === "User") {
+      filterCriteria = { User: getThis._id }
+    } else {
+      filterCriteria = null
+    }
+
+    // Update status with condition for others
+    updatedUserDetails = await Users.updateMany(filterCriteria, { status: "locked" })
 
     const user = await Users.findByIdAndUpdate(new mongoose.Types.ObjectId(req.params.userId), { deleted: true, deletedAt: new Date() });
 
