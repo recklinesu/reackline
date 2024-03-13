@@ -24,13 +24,13 @@ routes.get("/get-data", [jwtVerify], async (req, res) => {
             res.status(200).json({
                 status:true,
                 message: "Data have been fetched successfully!",
-                data: data
+                data: JSON.parse(body)
             });
         } else {
             res.status(500).json({
                 status: false,
                 message: "Something went wrong! Please try again later.",
-                body
+                body: JSON.parse(body),
             }); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
