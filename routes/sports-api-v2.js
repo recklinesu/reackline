@@ -24,13 +24,13 @@ routes.get("/get-data", [headerVerify], async (req, res) => {
             res.status(200).json({
                 status:true,
                 message: "Data have been fetched successfully!",
-                data: body
+                data: JSON.parse(body)
             });
         } else {
             res.status(400).json({
                 status: false,
                 message: "Something went wrong! Please try again later.",
-                body: body,
+                body: JSON.parse(body),
             }); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
