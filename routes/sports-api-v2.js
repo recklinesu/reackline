@@ -16,12 +16,12 @@ const routes = express.Router();
 routes.get("/get-data", [headerVerify], async (req, res) => {
     request.get({
         url: req.body.api,
-        forever: false,
+        forever: false
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
             let data = JSON.parse(body);
-            res.setHeader('Content-Type', 'application/json').status(200).json({
+            res.status(200).json({
                 status:true,
                 message: "Data have been fetched successfully!",
                 data: body
