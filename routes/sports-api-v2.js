@@ -13,16 +13,15 @@ require("dotenv").config();
 const routes = express.Router();
 
 // Hits external apis
-routes.get("/get-data", [jwtVerify], async (req, res) => {
+routes.get("/get-data", [headerVerify], async (req, res) => {
     request.get({
         url: req.body.api,
         forever: false,
-        json: true
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
             let data = JSON.parse(body);
-            res.status(200).json({
+            res.setHeader('Content-Type', 'application/json').status(200).json({
                 status:true,
                 message: "Data have been fetched successfully!",
                 data: body
