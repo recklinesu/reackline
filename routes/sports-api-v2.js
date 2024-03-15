@@ -16,7 +16,8 @@ const routes = express.Router();
 routes.get("/get-data", [jwtVerify], async (req, res) => {
     request.get({
         url: req.body.api,
-        forever: false
+        forever: false,
+        json: true
     }, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
@@ -24,13 +25,13 @@ routes.get("/get-data", [jwtVerify], async (req, res) => {
             res.status(200).json({
                 status:true,
                 message: "Data have been fetched successfully!",
-                data: JSON.parse(body)
+                data: body
             });
         } else {
             res.status(400).json({
                 status: false,
                 message: "Something went wrong! Please try again later.",
-                body: JSON.parse(body),
+                body: body,
             }); 
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
