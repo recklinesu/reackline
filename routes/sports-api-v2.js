@@ -379,7 +379,7 @@ routes.get("/update-db-for-sports", async (req, res)=>{
 
 
     // send response
-    res.status(200).send(event);
+    res.status(200).json(event);
 })
 
 
