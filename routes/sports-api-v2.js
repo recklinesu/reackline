@@ -375,11 +375,11 @@ routes.get("/update-db-for-sports", async (req, res)=>{
         event = JSON.parse(body)
         const createSports = new Sports({event: event});
         await createSports.save()
+        res.status(200).json({
+            status: true,
+            data : event
+        });
     });
-
-
-    // send response
-    res.status(200).json(event);
 })
 
 
