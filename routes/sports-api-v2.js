@@ -408,6 +408,7 @@ const FetchLegues = async (events) => {
 }
 
 const FetchMatches = async (legues) => {
+    console.log(legues);
     const matchData = {}; // Object to store leagues data for each event
 
     // Fetch leagues data for each event concurrently
