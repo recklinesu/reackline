@@ -6,6 +6,7 @@ const jwtVerify = require("../middleware/jwtAuth");
 const suspendVerify = require("../middleware/jwtAuth");
 const headerVerify = require("../middleware/headerAuth");
 const ApiOrigins = require("../models/apiOrigin");
+const Sports = require("../models/sports/sports")
 const routePermissions = require("../GlobalFunctions/routePermission");
 
 require("dotenv").config();
@@ -357,5 +358,69 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
         }); 
     }
 });
+
+routes.get("/update-db-for-sports", async (req, res)=>{
+    await UpdateSports();
+    res.status(200).send("Done");
+})
+
+
+
+const UpdateSports = async () =>{
+    const deleteSports = await Sports.deleteMany();
+    const events = FetchEvents();
+    const createSports = new Sports({events: events});
+    await createSports.save();
+}
+
+const FetchEvents = () =>{
+    const api = process.env.APP_SPORTS_URL+"api/v2/getSport"
+    request.get({
+        url: api,
+        forever: false
+    }, function(error, response, body) {
+        return JSON.parse(body)
+    });
+}
+
+const FetchLegues = (event_id) =>{
+    const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listCompetitions&EventTypeID="+event_id;
+    request.get({
+        url: api,
+        forever: false
+    }, function(error, response, body) {
+        return JSON.parse(body)
+    });
+}
+
+const FetchMatches = (event_id, compation_id) =>{
+    const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listEvents&EventTypeID="+event_id+"&CompetitionID="+compation_id;
+    request.get({
+        url: api,
+        forever: false
+    }, function(error, response, body) {
+        return JSON.parse(body)
+    });
+}
+
+const FetchMarkets = (event_id, match_id) =>{
+    const api = process.env.APP_SPORTS_URL+"api/v2/getMarkets?EventTypeID="+event_id+"&EventID="+match_id;
+    request.get({
+        url: api,
+        forever: false
+    }, function(error, response, body) {
+        return JSON.parse(body)
+    });
+}
+
+const FetchOdds = (event_id, market_id) =>{
+    const api = process.env.APP_SPORTS_URL+"api/v2/getMarketsOdds?EventTypeID="+event_id+"&marketId="+market_id;
+    request.get({
+        url: api,
+        forever: false
+    }, function(error, response, body) {
+        return JSON.parse(body)
+    });
+}
 
 module.exports = routes
