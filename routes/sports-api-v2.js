@@ -361,19 +361,25 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
 
 routes.get("/update-db-for-sports", async (req, res)=>{
     const deleteSports = await Sports.deleteMany();
+    let event = [];
+    let legues = [];
+    let matches = [];
+    let markets = [];
+    let odds = [];
     // Update Events
     const api = process.env.APP_SPORTS_URL+"api/v2/getSport"
     request.get({
         url: api,
         forever: false
     }, async function(error, response, body) {
-        const createSports = new Sports({event: JSON.parse(body)});
+        event = JSON.parse(body)
+        const createSports = new Sports({event: event});
         await createSports.save()
     });
 
 
     // send response
-    res.status(200).send("Done");
+    res.status(200).send(event);
 })
 
 
