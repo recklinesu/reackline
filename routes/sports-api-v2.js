@@ -366,7 +366,7 @@ routes.get("/update-db-for-sports", async (req, res) => {
         await Sports.deleteMany();
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
-        const matches = await FetchMatches(events);
+        const matches = await FetchMatches(legues);
         const saveSports = await Sports({ event: events, legues: legues, matches: matches });
         await saveSports.save()
         // send 
