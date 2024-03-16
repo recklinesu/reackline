@@ -373,16 +373,15 @@ routes.get("/update-db-for-sports", async (req, res)=>{
         forever: false
     }, async function(error, response, body) {
         event = JSON.parse(body)
-        const createEvent = new Sports({event: event});
-        await createEvent.save()
+
 
         // Update legues
         event.forEach((data)=>{
             legues = FetchLegues(data.eventType)
         });
 
-        const createLegue = new Sports({legues: legues})
-        await createLegue.save()
+        const createSports = new Sports({event: event, legues: legues})
+        await createSports.save()
 
         res.send("done")
     });
