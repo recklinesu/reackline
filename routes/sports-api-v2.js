@@ -392,7 +392,7 @@ const FetchLegues = async (events) => {
             data = response.data;
         });
 
-        const legues = await Promise.all(leguesPromises);
+        // const legues = await Promise.all(leguesPromises);
         return data;
 }
 
