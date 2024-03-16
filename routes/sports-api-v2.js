@@ -366,7 +366,7 @@ routes.get("/update-db-for-sports", async (req, res) => {
         await Sports.deleteMany();
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
-        const matches = await FetchLegues(events);
+        const matches = await FetchMatches(events);
         const saveSports = await Sports({ event: events, legues: legues, matches: matches });
         await saveSports.save()
         // send 
@@ -428,15 +428,15 @@ const FetchMatches = async (legues) => {
     return matchData; // Return object containing matches data for all leagues
 }
 
-const FetchMatchess = (event_id, compation_id) => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function (error, response, body) {
-        return JSON.parse(body)
-    });
-}
+// const FetchMatchess = (event_id, compation_id) => {
+//     const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
+//     request.get({
+//         url: api,
+//         forever: false
+//     }, function (error, response, body) {
+//         return JSON.parse(body)
+//     });
+// }
 
 const FetchMarkets = (event_id, match_id) => {
     const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + event_id + "&EventID=" + match_id;
