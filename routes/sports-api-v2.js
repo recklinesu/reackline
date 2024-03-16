@@ -409,25 +409,36 @@ const FetchLegues = async (events) => {
     return leguesData; // Return object containing leagues data for all events
 }
 
-const FetchMatches = async (legues) => {
-    const matchData = {}; // Object to store leagues data for each event
+const FetchMatches = async (leagues) => {
+    const matchData = {}; // Object to store match data for each league
 
-    // Fetch leagues data for each event concurrently
-    await Promise.all(legues.map(async (legue) => {
-        if(legue.legue.length){
-            const eventType = legue.eventType;
-            await Promise.all(legue.legue.map(async (compete) => {
+    // Fetch match data for each league concurrently
+    await Promise.all(Object.keys(data).forEach(async (key) => {
+        const league = data[key];
+        if (league.legue.length) {
+            const eventType = league.eventType;
+            await Promise.all(league.legue.map(async (compete) => {
                 try {
                     const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + eventType + "&CompetitionID=" + JSON.parse(compete.competition.id);
-                    matchData[compete.competition.id] = {eventType: eventType, legueType: compete.competition.id, matches: response.data}; //    Store leagues data for this event
+                    const response = await axios.get(api); // Fetch data from API
+                    matchData[compete.competition.id] = {
+                        eventType: eventType,
+                        legueType: compete.competition.id,
+                        matches: response.data // Store match data for this league
+                    };
                 } catch (error) {
-                    matchData[compete.competition.id] = {eventType: eventType, legueType: compete.competition.id, error: "No data"}; //    Store leagues data for this event
+                    console.error("Error fetching matches for league:", compete.competition.id, error);
+                    matchData[compete.competition.id] = {
+                        eventType: eventType,
+                        legueType: compete.competition.id,
+                        error: "No data" // Store error message if data fetching fails
+                    };
                 }
             }));
         }
     }));
 
-    return matchData; // Return object containing matches data for all leagues
+    return matchData; // Return object containing match data for all leagues
 }
 
 // const FetchMatchess = (event_id, compation_id) => {
