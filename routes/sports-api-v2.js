@@ -367,7 +367,7 @@ routes.get("/update-db-for-sports", async (req, res) => {
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
         const matches = await FetchLegues(events);
-        const saveSports = await Sports({ event: events, legues: legues });
+        const saveSports = await Sports({ event: events, legues: legues, matches: matches });
         await saveSports.save()
         // send 
         res.status(200).json({
@@ -400,7 +400,6 @@ const FetchLegues = async (events) => {
             const response = await axios.get(api);
             leguesData[event.eventType] = {eventType: event.eventType, legue: response.data}; // Store leagues data for this event
         } catch (error) {
-            console.error("Error fetching leagues for event:", event.eventType, error);
             leguesData[event.eventType] = {eventType: event.eventType, error: "No data"}; // Store placeholder data in case of error
         }
     }));
@@ -408,7 +407,28 @@ const FetchLegues = async (events) => {
     return leguesData; // Return object containing leagues data for all events
 }
 
-const FetchMatches = (event_id, compation_id) => {
+const FetchMatches = async (legues) => {
+    const matchData = {}; // Object to store leagues data for each event
+
+    // Fetch leagues data for each event concurrently
+    await Promise.all(legues.map(async (legue) => {
+        if(legue.legue.length){
+            const eventType = legue.eventType;
+            await Promise.all(legue.map(async (compete) => {
+                try {
+                    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + eventType + "&CompetitionID=" + JSON.parse(compete.competition.id);
+                    matchData[compete.competition.id] = {eventType: eventType, legueType: compete.competition.id, matches: response.data}; //    Store leagues data for this event
+                } catch (error) {
+                    matchData[compete.competition.id] = {eventType: eventType, legueType: compete.competition.id, error: "No data"}; //    Store leagues data for this event
+                }
+            }));
+        }
+    }));
+
+    return matchData; // Return object containing matches data for all leagues
+}
+
+const FetchMatchess = (event_id, compation_id) => {
     const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
     request.get({
         url: api,
