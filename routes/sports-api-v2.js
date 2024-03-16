@@ -400,7 +400,7 @@ const FetchLegues = async (events) => {
             leguesData[event.eventType] = response.data; // Store leagues data for this event
         } catch (error) {
             console.error("Error fetching leagues for event:", event.eventType, error);
-            leguesData[event.eventType] = {legues: "No data"}; // Store placeholder data in case of error
+            leguesData[event.eventType] = {error: "No data"}; // Store placeholder data in case of error
         }
     }));
 
