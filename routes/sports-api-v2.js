@@ -366,6 +366,7 @@ routes.get("/update-db-for-sports", async (req, res) => {
         await Sports.deleteMany();
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
+        const matches = await FetchLegues(events);
         const saveSports = await Sports({ event: events, legues: legues });
         await saveSports.save()
         // send 
@@ -397,10 +398,10 @@ const FetchLegues = async (events) => {
         try {
             const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(event.eventType);
             const response = await axios.get(api);
-            leguesData[event.eventType] = response.data; // Store leagues data for this event
+            leguesData[event.eventType] = {eventType: event.eventType, legue: response.data}; // Store leagues data for this event
         } catch (error) {
             console.error("Error fetching leagues for event:", event.eventType, error);
-            leguesData[event.eventType] = {error: "No data"}; // Store placeholder data in case of error
+            leguesData[event.eventType] = {eventType: event.eventType, error: "No data"}; // Store placeholder data in case of error
         }
     }));
 
