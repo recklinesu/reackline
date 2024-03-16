@@ -386,70 +386,15 @@ routes.get("/update-db-for-sports", async (req, res) => {
     }
 })
 
-const FetchEvents = async () => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/getSport";
-    const response = await axios.get(api);
-    return response.data;
-};
-
-const FetchLegues = async (events) => {
-    const leguesData = {}; // Object to store leagues data for each event
-
-    // Fetch leagues data for each event concurrently
-    await Promise.all(events.map(async (event) => {
-        try {
-            const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(event.eventType);
-            const response = await axios.get(api);
-            leguesData[event.eventType] = {eventType: event.eventType, legue: response.data}; // Store leagues data for this event
-        } catch (error) {
-            leguesData[event.eventType] = {eventType: event.eventType, error: "No data"}; // Store placeholder data in case of error
-        }
-    }));
-
-    return leguesData; // Return object containing leagues data for all events
+const FetchMatchess = (event_id, compation_id) => {
+    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
+    request.get({
+        url: api,
+        forever: false
+    }, function (error, response, body) {
+        return JSON.parse(body)
+    });
 }
-
-const FetchMatches = async (leagues) => {
-    const matchData = {}; // Object to store match data for each league
-
-    // Fetch match data for each league concurrently
-    await Promise.all(Object.keys(data).forEach(async (key) => {
-        const league = data[key];
-        if (league.legue.length) {
-            const eventType = league.eventType;
-            await Promise.all(league.legue.map(async (compete) => {
-                try {
-                    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + eventType + "&CompetitionID=" + JSON.parse(compete.competition.id);
-                    const response = await axios.get(api); // Fetch data from API
-                    matchData[compete.competition.id] = {
-                        eventType: eventType,
-                        legueType: compete.competition.id,
-                        matches: response.data // Store match data for this league
-                    };
-                } catch (error) {
-                    console.error("Error fetching matches for league:", compete.competition.id, error);
-                    matchData[compete.competition.id] = {
-                        eventType: eventType,
-                        legueType: compete.competition.id,
-                        error: "No data" // Store error message if data fetching fails
-                    };
-                }
-            }));
-        }
-    }));
-
-    return matchData; // Return object containing match data for all leagues
-}
-
-// const FetchMatchess = (event_id, compation_id) => {
-//     const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
-//     request.get({
-//         url: api,
-//         forever: false
-//     }, function (error, response, body) {
-//         return JSON.parse(body)
-//     });
-// }
 
 const FetchMarkets = (event_id, match_id) => {
     const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + event_id + "&EventID=" + match_id;
