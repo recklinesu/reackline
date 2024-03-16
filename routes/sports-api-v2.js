@@ -369,7 +369,7 @@ routes.get("/update-db-for-sports", async (req, res)=>{
 const UpdateSports = async () =>{
     const deleteSports = await Sports.deleteMany();
     const events = FetchEvents();
-    const createSports = new Sports({events: events});
+    const createSports = new Sports({event: events});
     await createSports.save();
 }
 
