@@ -366,15 +366,17 @@ routes.get("/update-db-for-sports", async (req, res) => {
         await Sports.deleteMany();
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
-        const matches = await FetchMatches(legues);
-        const saveSports = await Sports({ event: events, legues: legues, matches: matches });
+        // const matches = await FetchMatches(legues);
+        // const saveSports = await Sports({ event: events, legues: legues, matches: matches });
+        const saveSports = await Sports({ event: events, legues: legues });
         await saveSports.save()
         // send 
-        res.status(200).json({
-            status: true,
-            message: "Done",
-            saveSports
-        })
+        // res.status(200).json({
+        //     status: true,
+        //     message: "Done",
+        //     saveSports
+        // })
+        res.status(200).json(legues)
     } catch (error) {
         res.status(500).json({
             status: false,
@@ -408,7 +410,6 @@ const FetchLegues = async (events) => {
 }
 
 const FetchMatches = async (legues) => {
-    console.log(legues);
     const matchData = {}; // Object to store leagues data for each event
 
     // Fetch leagues data for each event concurrently
