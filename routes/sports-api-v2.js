@@ -361,21 +361,26 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
 });
 
 routes.get("/update-db-for-sports", async (req, res) => {
-    // Delete
-    await Sports.deleteMany();
-    // Fetch events
-    const events = await FetchEvents();
-    // Fetch legues
-    const legues = await FetchLegues(events);
-    // save data
-    const saveSports = await Sports({event: events, legues: legues});
-    await saveSports.save()
-    // send response
-    res.status(200).json({
-        status: true,
-        message: "Done",
-        events
-    })
+    try {
+        // Delete
+        await Sports.deleteMany();
+        const events = await FetchEvents();
+        const legues = await FetchLegues(events);
+        const saveSports = await Sports({ event: events, legues: legues });
+        await saveSports.save()
+        // send 
+        res.status(200).json({
+            status: true,
+            message: "Done",
+            saveSports
+        })
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "error",
+            error: error
+        })
+    }
 })
 
 const FetchEvents = async () => {
@@ -385,15 +390,21 @@ const FetchEvents = async () => {
 };
 
 const FetchLegues = async (events) => {
-        let data = {};
-        const leguesPromises = events.map(async (event) => {
+    const leguesData = {}; // Object to store leagues data for each event
+
+    // Fetch leagues data for each event concurrently
+    await Promise.all(events.map(async (event) => {
+        try {
             const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(event.eventType);
             const response = await axios.get(api);
-            data = response.data;
-        });
+            leguesData[event.eventType] = response.data; // Store leagues data for this event
+        } catch (error) {
+            console.error("Error fetching leagues for event:", event.eventType, error);
+            leguesData[event.eventType] = {legues: "No data"}; // Store placeholder data in case of error
+        }
+    }));
 
-        // const legues = await Promise.all(leguesPromises);
-        return data;
+    return leguesData; // Return object containing leagues data for all events
 }
 
 const FetchMatches = (event_id, compation_id) => {
