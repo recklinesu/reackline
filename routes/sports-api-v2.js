@@ -385,13 +385,24 @@ const FetchEvents = async () => {
 };
 
 const FetchLegues = async (events) => {
-    const data = {};
-    await events.map(async (data)=>{
-        const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(data.eventType);
+    const leguesPromises = events.map(async (event) => {
+        const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(event.eventType);
         const response = await axios.get(api);
-        data = response.data;
-    })
-    return data;
+        return response.data;
+    });
+
+    // Wait for all promises to resolve
+    const legues = await Promise.all(leguesPromises);
+
+    // Combine data from all promises into a single object
+    const combinedLegues = legues.reduce((acc, legue) => {
+        // You need to define how you want to combine legues from different events
+        // For example, you might want to merge them into a single array or object
+        // Here, I'm assuming you want to merge them into a single array
+        return acc.concat(legue);
+    }, []);
+
+    return combinedLegues;
 }
 
 const FetchMatches = (event_id, compation_id) => {
