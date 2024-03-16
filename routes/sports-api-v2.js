@@ -361,7 +361,7 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
 
 routes.get("/update-db-for-sports", async (req, res)=>{
     const deleteSports = await Sports.deleteMany();
-    let event = null;
+    let event = {};
     let legues = [];
     let matches = [];
     let markets = [];
