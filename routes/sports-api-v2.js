@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
 const request = require('request');
+const axios = require("axios");
 const jwtVerify = require("../middleware/jwtAuth");
 const suspendVerify = require("../middleware/jwtAuth");
 const headerVerify = require("../middleware/headerAuth");
@@ -18,12 +19,12 @@ routes.get("/get-data", [headerVerify], async (req, res) => {
     request.get({
         url: req.body.api,
         forever: false
-    }, function(error, response, body) {
+    }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             // console.log(body);
             let data = JSON.parse(body);
             res.status(200).json({
-                status:true,
+                status: true,
                 message: "Data have been fetched successfully!",
                 data: JSON.parse(body)
             });
@@ -32,7 +33,7 @@ routes.get("/get-data", [headerVerify], async (req, res) => {
                 status: false,
                 message: "Something went wrong! Please try again later.",
                 body: JSON.parse(body),
-            }); 
+            });
             // console.error("Error:", error);
             // res.status(response.statusCode).send("Error fetching data");
         }
@@ -43,12 +44,12 @@ routes.get("/get-data", [headerVerify], async (req, res) => {
 routes.get("/fetch-events", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getSport";
+        const api = process.env.APP_SPORTS_URL + "api/v2/getSport";
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -60,14 +61,14 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -76,12 +77,12 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
 routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listCompetitions&EventTypeID="+req.params.event_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + req.params.event_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -93,14 +94,14 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -108,12 +109,12 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
 routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listEvents&EventTypeID="+req.params.event_id+"&CompetitionID="+req.params.compation_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + req.params.event_id + "&CompetitionID=" + req.params.compation_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -125,14 +126,14 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -140,12 +141,12 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
 routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/score?EventTypeID="+req.params.event_id+"&matchId="+req.params.match_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/score?EventTypeID=" + req.params.event_id + "&matchId=" + req.params.match_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -157,14 +158,14 @@ routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -172,12 +173,12 @@ routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
 routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getMarkets?EventTypeID="+req.params.event_id+"&EventID="+req.params.match_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + req.params.event_id + "&EventID=" + req.params.match_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -189,14 +190,14 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -235,12 +236,12 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
 routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getMarketsOdds?EventTypeID="+req.params.event_id+"&marketId="+req.params.market_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/getMarketsOdds?EventTypeID=" + req.params.event_id + "&marketId=" + req.params.market_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -252,14 +253,14 @@ routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res)
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -267,12 +268,12 @@ routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res)
 routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getSessions?EventTypeID="+req.params.event_id+"&matchId="+req.params.match_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/getSessions?EventTypeID=" + req.params.event_id + "&matchId=" + req.params.match_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -284,14 +285,14 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -299,12 +300,12 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
 routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getBookmakers?EventTypeID="+req.params.event_id+"&EventID="+req.params.match_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/getBookmakers?EventTypeID=" + req.params.event_id + "&EventID=" + req.params.match_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -316,14 +317,14 @@ routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) =
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
@@ -331,12 +332,12 @@ routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) =
 routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, res) => {
     try {
 
-        const api = process.env.APP_SPORTS_URL+"api/v2/getBookmakerOdds?EventTypeID="+req.params.event_id+"&marketId="+req.params.market_id;
+        const api = process.env.APP_SPORTS_URL + "api/v2/getBookmakerOdds?EventTypeID=" + req.params.event_id + "&marketId=" + req.params.market_id;
 
         request.get({
             url: api,
             forever: false
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 res.status(200).json({
                     status: true,
@@ -348,99 +349,77 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
                     status: false,
                     message: "Something went wrong! Please try again later.",
                     body: JSON.parse(body),
-                }); 
+                });
             }
         });
     } catch (error) {
         res.status(500).json({
             status: false,
             message: "Internal error!"
-        }); 
+        });
     }
 });
 
-routes.get("/update-db-for-sports", async (req, res)=>{
-    const deleteSports = await Sports.deleteMany();
-    let event = {};
-    let legues = [];
-    let matches = [];
-    let markets = [];
-    let odds = [];
-    // Update Events
-    const api = process.env.APP_SPORTS_URL+"api/v2/getSport"
-    request.get({
-        url: api,
-        forever: false
-    }, async function(error, response, body) {
-        event = JSON.parse(body)
-
-
-        // Update legues
-        event.forEach((data)=>{
-            legues = FetchLegues(data.eventType)
-        });
-
-        const createSports = new Sports({event: event, legues: legues})
-        await createSports.save()
-
-        res.send("done")
-    });
+routes.get("/update-db-for-sports", async (req, res) => {
+    // Delete
+    await Sports.deleteMany();
+    // Fetch events
+    const events = await FetchEvents();
+    // Fetch legues
+    const legues = await FetchLegues(events);
+    // save data
+    const saveSports = await Sports({event: events, legues: legues});
+    await saveSports.save()
+    // send response
+    res.status(200).json({
+        status: true,
+        message: "Done",
+        events
+    })
 })
 
+const FetchEvents = async () => {
+    const api = process.env.APP_SPORTS_URL + "api/v2/getSport";
+    const response = await axios.get(api);
+    return response.data;
+};
 
-
-const UpdateSports = async () =>{
-    const events = FetchEvents();
-    const createSports = new Sports({event: events});
-    await createSports.save();
+const FetchLegues = async (events) => {
+    const data = {};
+    await events.map(async (data)=>{
+        const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(data.eventType);
+        const response = await axios.get(api);
+        data = response.data;
+    })
+    return data;
 }
 
-const FetchEvents = () =>{
-    const api = process.env.APP_SPORTS_URL+"api/v2/getSport"
+const FetchMatches = (event_id, compation_id) => {
+    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
     request.get({
         url: api,
         forever: false
-    }, function(error, response, body) {
+    }, function (error, response, body) {
         return JSON.parse(body)
     });
 }
 
-const FetchLegues = (event_id) =>{
-    const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listCompetitions&EventTypeID="+event_id;
+const FetchMarkets = (event_id, match_id) => {
+    const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + event_id + "&EventID=" + match_id;
     request.get({
         url: api,
         forever: false
-    }, function(error, response, body) {
+    }, function (error, response, body) {
         return JSON.parse(body)
     });
 }
 
-const FetchMatches = (event_id, compation_id) =>{
-    const api = process.env.APP_SPORTS_URL+"api/v2/fetch_data?Action=listEvents&EventTypeID="+event_id+"&CompetitionID="+compation_id;
+const FetchOdds = (event_id, market_id) => {
+    const api = process.env.APP_SPORTS_URL + "api/v2/getMarketsOdds?EventTypeID=" + event_id + "&marketId=" + market_id;
     request.get({
         url: api,
         forever: false
-    }, function(error, response, body) {
-        return JSON.parse(body)
-    });
-}
-
-const FetchMarkets = (event_id, match_id) =>{
-    const api = process.env.APP_SPORTS_URL+"api/v2/getMarkets?EventTypeID="+event_id+"&EventID="+match_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function(error, response, body) {
-        return JSON.parse(body)
-    });
-}
-
-const FetchOdds = (event_id, market_id) =>{
-    const api = process.env.APP_SPORTS_URL+"api/v2/getMarketsOdds?EventTypeID="+event_id+"&marketId="+market_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function(error, response, body) {
+    }, function (error, response, body) {
         return JSON.parse(body)
     });
 }
