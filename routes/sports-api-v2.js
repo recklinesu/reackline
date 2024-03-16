@@ -414,7 +414,7 @@ const FetchMatches = async (legues) => {
     await Promise.all(legues.map(async (legue) => {
         if(legue.legue.length){
             const eventType = legue.eventType;
-            await Promise.all(legue.map(async (compete) => {
+            await Promise.all(legue.legue.map(async (compete) => {
                 try {
                     const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + eventType + "&CompetitionID=" + JSON.parse(compete.competition.id);
                     matchData[compete.competition.id] = {eventType: eventType, legueType: compete.competition.id, matches: response.data}; //    Store leagues data for this event
