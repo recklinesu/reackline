@@ -385,7 +385,7 @@ routes.get("/update-sports", [headerVerify], async (req, res) => {
     }
 })
 
-routes.get("/get-sports-all", [headerVerify], async (req, res) => {
+routes.get("/get-sports/all", [headerVerify], async (req, res) => {
     try {
         let sportsData = await Sports.find()
         // send 
@@ -405,7 +405,7 @@ routes.get("/get-sports-all", [headerVerify], async (req, res) => {
 })
 
 
-routes.get("/get-sports-matches", [headerVerify], async (req, res) => {
+routes.get("/get-sports/matches", [headerVerify], async (req, res) => {
     try {
         let sportsData = await Sports.find()
         // send 
