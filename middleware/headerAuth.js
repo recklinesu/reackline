@@ -7,7 +7,6 @@ const headerVerify = async (req, res, next) => {
 
   try {
     const domainName = req.headers["origin"];
-    console.log(req.headers["origin"]);
 
     if(!domainName){
       return res
