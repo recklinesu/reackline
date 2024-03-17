@@ -477,7 +477,22 @@ const FetchMatches = async (leagues) => {
             await Promise.all(response.data.data.map(async (compete)=>{
                 compete.eventType = event.eventType;
                 compete.competition = {id: event.competition.id,name: event.competition.name}
-                compete.markets = await FetchMarkets(event.eventType, compete.event.id)
+                try {
+                    await FetchSessions(event.eventType, compete.event.id)
+                    compete.sessions = true
+                } catch (error) {
+                    compete.sessions = false
+                }
+                try {
+                    compete.markets = await FetchMarkets(event.eventType, compete.event.id)
+                } catch (error) {
+                    compete.markets = []
+                }
+                try {
+                    compete.bookmarkers = await FetchBookmarkers(event.eventType, compete.event.id)
+                } catch (error) {
+                    compete.bookmarkers = []
+                }
                 legueArray.push(compete)
             }))
         } catch (error) {
@@ -496,15 +511,48 @@ const FetchMarkets = async (eventId, matchId) => {
     const api = "https://api.recklinesports.com/api/1-5-B-S-P-C-F-S-0-0-5/fetch-markets/" + parseInt(eventId) + "/" + parseInt(matchId);
     const response = await axios.get(api);
     await Promise.all(response.data.data.map(async (data)=>{
-        data.marketOdds = await FetchOdds(eventId,  data.marketId);
+        try {
+            data.marketOdds = await FetchOdds(eventId,  data.marketId);
+        } catch (error) {
+            data.marketOdds = []
+        }
         dataG.push(data);
     }))
     return dataG;
 
 }
 
+
+const FetchSessions = async (eventId, matchId) => {
+    const api = "https://api.recklinesports.com/api/1-5-B-S-P-C-F-S-0-0-5/fetch-market-session/" + parseInt(eventId) + "/" + parseInt(matchId);
+    const response = await axios.get(api);
+    return response.data.data;
+}
+
 const FetchOdds = async (eventId, marketId) => {
     const api = "https://api.recklinesports.com/api/1-5-B-S-P-C-F-S-0-0-5/fetch-market-odds/" + parseInt(eventId) + "/" + parseFloat(marketId);
+    const response = await axios.get(api);
+    return response.data.data;
+}
+
+const FetchBookmarkers = async (eventId, matchId) => {
+    const dataG = [];
+    const api = "https://api.recklinesports.com/api/1-5-B-S-P-C-F-S-0-0-5/fetch-bookmarker/" + parseInt(eventId) + "/" + parseInt(matchId);
+    const response = await axios.get(api);
+    await Promise.all(response.data.data.map(async (data)=>{
+        try {
+            data.bookmarkerOdds = await FetchBookmarkersOdds(eventId,  data.marketId);
+        } catch (error) {
+            data.bookmarkerOdds = [];
+        }
+        dataG.push(data);
+    }))
+    return dataG;
+}
+
+const FetchBookmarkersOdds = async (eventId, marketId) => {
+    const api = "https://api.recklinesports.com/api/1-5-B-S-P-C-F-S-0-0-5/fetch-bookmarker-odds/" + parseInt(eventId) + "/" + marketId;
+    console.log(api);
     const response = await axios.get(api);
     return response.data.data;
 }
