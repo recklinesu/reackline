@@ -404,7 +404,11 @@ const FetchLegues = async (events) => {
     await Promise.all(events.map(async (event) => {
         try {
             const api = "https://api.recklinesports.com/api/v2/fetch-compatitions/" + parseInt(event.eventType);
-            const response = await axios.get(api);
+            const response = await axios.get(api, {
+        headers: {
+            Origin: "https://api.recklinesports.com/api/v2/fetch-events"
+        }
+    });
             legueWithKeys[event.eventType] = {eventType: event.eventType, legues: response.data.data}; // Store leagues data for this event
             await Promise.all(response.data.data.map(async (compete)=>{
                 compete.eventType = event.eventType;
@@ -429,7 +433,11 @@ const FetchMatches = async (leagues) => {
     await Promise.all(leagues.map(async (event) => {
         try {
             const api = "https://api.recklinesports.com/api/v2/fetch-matches/" + parseInt(event.eventType) + "/" + parseInt(event.competition.id);
-            const response = await axios.get(api);
+            const response = await axios.get(api, {
+        headers: {
+            Origin: "https://api.recklinesports.com/api/v2/fetch-events"
+        }
+    });
             legueWithKeys[event.eventType] = {eventType: event.eventType, competition: {id: event.competition.id,name: event.competition.name}, matches: response.data.data}; // Store leagues data for this event
             await Promise.all(response.data.data.map(async (compete)=>{
                 compete.eventType = event.eventType;
@@ -451,7 +459,11 @@ const FetchMatches = async (leagues) => {
 const FetchMarkets = async (eventId, matchId) => {
     const dataG = [];
     const api = "https://api.recklinesports.com/api/v2/fetch-markets/" + parseInt(eventId) + "/" + parseInt(matchId);
-    const response = await axios.get(api);
+    const response = await axios.get(api, {
+        headers: {
+            Origin: "https://api.recklinesports.com/api/v2/fetch-events"
+        }
+    });
     await Promise.all(response.data.data.map(async (data)=>{
         data.marketOdds = await FetchOdds(eventId,  data.marketId);
         dataG.push(data);
@@ -462,7 +474,11 @@ const FetchMarkets = async (eventId, matchId) => {
 
 const FetchOdds = async (eventId, marketId) => {
     const api = "https://api.recklinesports.com/api/v2/fetch-market-odds/" + parseInt(eventId) + "/" + parseFloat(marketId);
-    const response = await axios.get(api);
+    const response = await axios.get(api, {
+        headers: {
+            Origin: "https://api.recklinesports.com/api/v2/fetch-events"
+        }
+    });
     return response.data.data;
 }
 
