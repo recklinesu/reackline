@@ -387,7 +387,11 @@ routes.get("/update-sports", [headerVerify], async (req, res) => {
 
 const FetchEvents = async () => {
     const api = "https://api.recklinesports.com/api/v2/fetch-events";
-    const response = await axios.get(api);
+    const response = await axios.get(api, {
+        headers: {
+            Origin: "https://api.recklinesports.com/api/v2/fetch-events"
+        }
+    });
     return response.data.data;
 };
 
