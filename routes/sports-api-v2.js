@@ -366,15 +366,14 @@ routes.get("/update-db-for-sports", async (req, res) => {
         await Sports.deleteMany();
         const events = await FetchEvents();
         const legues = await FetchLegues(events);
-        const matches = await FetchMatches(legues);
-        const saveSports = await Sports({ event: events, legues: legues, matches: matches });
-        // const saveSports = await Sports({ event: events, legues: legues });
+        const matches = await FetchMatches(legues.legueArray);
+        const saveSports = await Sports({ event: events, legues: legues.legue, matches: matches.matchArray });
         await saveSports.save()
         // send 
         res.status(200).json({
             status: true,
             message: "Done",
-            saveSports
+            matches: matches.matchArray
         })
         // res.status(200).json(legues)
     } catch (error) {
@@ -386,34 +385,81 @@ routes.get("/update-db-for-sports", async (req, res) => {
     }
 })
 
-const FetchMatchess = (event_id, compation_id) => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + event_id + "&CompetitionID=" + compation_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function (error, response, body) {
-        return JSON.parse(body)
-    });
+const FetchEvents = async () => {
+    const api = "https://api.recklinesports.com/api/v2/fetch-events";
+    const response = await axios.get(api);
+    return response.data.data;
+};
+
+const FetchLegues = async (events) => {
+    const leguesData = {}; // Object to store leagues data for each event
+    const legueArray = [];
+    const legueWithKeys = {};
+
+    // Fetch leagues data for each event concurrently
+    await Promise.all(events.map(async (event) => {
+        try {
+            const api = "https://api.recklinesports.com/api/v2/fetch-compatitions/" + parseInt(event.eventType);
+            const response = await axios.get(api);
+            legueWithKeys[event.eventType] = {eventType: event.eventType, legues: response.data.data}; // Store leagues data for this event
+            await Promise.all(response.data.data.map(async (compete)=>{
+                compete.eventType = event.eventType;
+                legueArray.push(compete)
+            }))
+        } catch (error) {
+            // leguesData[event.eventType] = {eventType: event.eventType, error: "No data"}; // Store placeholder data in case of error
+        }
+    }));
+
+    leguesData["legue"] = legueWithKeys; // Return object containing leagues data for all events
+    leguesData["legueArray"] = legueArray; // Return object containing leagues data for all events
+    return leguesData
 }
 
-const FetchMarkets = (event_id, match_id) => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + event_id + "&EventID=" + match_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function (error, response, body) {
-        return JSON.parse(body)
-    });
+const FetchMatches = async (leagues) => {
+    const leguesData = {}; // Object to store leagues data for each event
+    const legueArray = [];
+    const legueWithKeys = {};
+
+    // Fetch leagues data for each event concurrently
+    await Promise.all(leagues.map(async (event) => {
+        try {
+            const api = "https://api.recklinesports.com/api/v2/fetch-matches/" + parseInt(event.eventType) + "/" + parseInt(event.competition.id);
+            const response = await axios.get(api);
+            legueWithKeys[event.eventType] = {eventType: event.eventType, competition: {id: event.competition.id,name: event.competition.name}, matches: response.data.data}; // Store leagues data for this event
+            await Promise.all(response.data.data.map(async (compete)=>{
+                compete.eventType = event.eventType;
+                compete.competition = {id: event.competition.id,name: event.competition.name}
+                compete.markets = await FetchMarkets(event.eventType, compete.event.id)
+                legueArray.push(compete)
+            }))
+        } catch (error) {
+            // leguesData[event.eventType] = {eventType: event.eventType, error: "No data"}; // Store placeholder data in case of error
+        }
+    }));
+
+    leguesData["match"] = legueWithKeys; // Return object containing leagues data for all events
+    leguesData["matchArray"] = legueArray; // Return object containing leagues data for all events
+    return leguesData
 }
 
-const FetchOdds = (event_id, market_id) => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/getMarketsOdds?EventTypeID=" + event_id + "&marketId=" + market_id;
-    request.get({
-        url: api,
-        forever: false
-    }, function (error, response, body) {
-        return JSON.parse(body)
-    });
+
+const FetchMarkets = async (eventId, matchId) => {
+    const dataG = [];
+    const api = "https://api.recklinesports.com/api/v2/fetch-markets/" + parseInt(eventId) + "/" + parseInt(matchId);
+    const response = await axios.get(api);
+    await Promise.all(response.data.data.map(async (data)=>{
+        data.marketOdds = await FetchOdds(eventId,  data.marketId);
+        dataG.push(data);
+    }))
+    return dataG;
+
+}
+
+const FetchOdds = async (eventId, marketId) => {
+    const api = "https://api.recklinesports.com/api/v2/fetch-market-odds/" + parseInt(eventId) + "/" + parseFloat(marketId);
+    const response = await axios.get(api);
+    return response.data.data;
 }
 
 module.exports = routes
