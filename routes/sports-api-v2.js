@@ -372,8 +372,47 @@ routes.get("/update-sports", [headerVerify], async (req, res) => {
         // send 
         res.status(200).json({
             status: true,
-            message: "Done",
-            matches: matches.matchArray
+            message: "Updated successfully.",
+            data: matches.matchArray
+        })
+        // res.status(200).json(legues)
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "error",
+            error: error
+        })
+    }
+})
+
+routes.get("/get-sports-all", [headerVerify], async (req, res) => {
+    try {
+        let sportsData = await Sports.find()
+        // send 
+        res.status(200).json({
+            status: true,
+            message: "Updated successfully.",
+            data: sportsData
+        })
+        // res.status(200).json(legues)
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: "error",
+            error: error
+        })
+    }
+})
+
+
+routes.get("/get-sports-matches", [headerVerify], async (req, res) => {
+    try {
+        let sportsData = await Sports.find()
+        // send 
+        res.status(200).json({
+            status: true,
+            message: "Updated successfully.",
+            data: sportsData.matches
         })
         // res.status(200).json(legues)
     } catch (error) {
