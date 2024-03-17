@@ -387,7 +387,7 @@ routes.get("/update-sports", [headerVerify], async (req, res) => {
 
 routes.get("/get-sports/all", [headerVerify], async (req, res) => {
     try {
-        let sportsData = await Sports.find()
+        let sportsData = await Sports.findOne().select("-_id")
         // send 
         res.status(200).json({
             status: true,
@@ -407,13 +407,21 @@ routes.get("/get-sports/all", [headerVerify], async (req, res) => {
 
 routes.get("/get-sports/matches", [headerVerify], async (req, res) => {
     try {
-        let sportsData = await Sports.find()
+        let sportsData = await Sports.findOne().select("-_id")
         // send 
-        res.status(200).json({
-            status: true,
-            message: "Matches Fetched successfully!",
-            data: sportsData.matches
-        })
+        if(sportsData.matches){
+            res.status(200).json({
+                status: true,
+                message: "Matches Fetched successfully!",
+                data: sportsData.matches
+            })
+        }else{
+            res.status(400).json({
+                status: false,
+                message: "No matches found!",
+                data: sportsData.matches
+            })
+        }
         // res.status(200).json(legues)
     } catch (error) {
         res.status(500).json({
