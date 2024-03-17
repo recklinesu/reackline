@@ -6,27 +6,26 @@ const ApiOrigins = require("../models/apiOrigin");
 const headerVerify = async (req, res, next) => {
 
   try {
-    // const domainName = req.headers["origin"];
+    const domainName = req.headers["origin"];
 
-    // if(!domainName){
-    //   return res
-    //   .status(401)
-    //   .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });    }
+    if(!domainName){
+      return res
+      .status(401)
+      .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });    }
     
-    // const filterCriteria = {
-    //     $or: [{ api: domainName  }, { api1: domainName }, {api2: domainName}],
-    // }
+    const filterCriteria = {
+        $or: [{ api: domainName  }, { api1: domainName }, {api2: domainName}],
+    }
 
-    // const domainData = await ApiOrigins.findOne(filterCriteria)
+    const domainData = await ApiOrigins.findOne(filterCriteria)
 
-    // if(!domainData){
-    //     return res
-    //   .status(401)
-    //   .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
-    // }
+    if(!domainData){
+        return res
+      .status(401)
+      .json({ status: false, error: "Unauthorized Access", message: "Invalid Request, please purchase in order to use this api." });
+    }
 
-    res.status(200).json(req.headers)
-    // next();
+    next();
 
   } catch (error) {
     return res
