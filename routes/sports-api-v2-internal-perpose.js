@@ -5,7 +5,6 @@ const request = require('request');
 const axios = require("axios");
 const jwtVerify = require("../middleware/jwtAuth");
 const suspendVerify = require("../middleware/jwtAuth");
-const headerVerify = require("../middleware/headerAuth");
 const ApiOrigins = require("../models/apiOrigin");
 const Sports = require("../models/sports/sports")
 const routePermissions = require("../GlobalFunctions/routePermission");
@@ -15,7 +14,7 @@ require("dotenv").config();
 const routes = express.Router();
 
 // Hits external apis
-routes.get("/get-data", [headerVerify], async (req, res) => {
+routes.get("/get-data",  async (req, res) => {
     request.get({
         url: req.body.api,
         forever: false
@@ -41,7 +40,7 @@ routes.get("/get-data", [headerVerify], async (req, res) => {
 });
 
 // Fetch events
-routes.get("/fetch-events", [headerVerify], (req, res) => {
+routes.get("/fetch-events",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getSport";
@@ -74,7 +73,7 @@ routes.get("/fetch-events", [headerVerify], (req, res) => {
 
 
 // Fetch compatitions as per event
-routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
+routes.get("/fetch-compatitions/:event_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + req.params.event_id;
@@ -106,7 +105,7 @@ routes.get("/fetch-compatitions/:event_id", [headerVerify], (req, res) => {
 });
 
 // Fetch matches via event as compatition id
-routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) => {
+routes.get("/fetch-matches/:event_id/:compation_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + req.params.event_id + "&CompetitionID=" + req.params.compation_id;
@@ -138,7 +137,7 @@ routes.get("/fetch-matches/:event_id/:compation_id", [headerVerify], (req, res) 
 });
 
 // Fetch matches scores via match ids
-routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
+routes.get("/fetch-score/:event_id/:match_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/score?EventTypeID=" + req.params.event_id + "&matchId=" + req.params.match_id;
@@ -170,7 +169,7 @@ routes.get("/fetch-score/:event_id/:match_id", [headerVerify], (req, res) => {
 });
 
 // Fetch market of match ids
-routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
+routes.get("/fetch-markets/:event_id/:match_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + req.params.event_id + "&EventID=" + req.params.match_id;
@@ -202,7 +201,7 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
 });
 
 // Fetch market run of market
-// routes.get("/fetch-market-runner/:market_id", [headerVerify], (req, res) => {
+// routes.get("/fetch-market-runner/:market_id",  (req, res) => {
 //     try {
 
 //         const api = process.env.APP_SPORTS_URL+"api/v1/fetch_data?Action=listMarketRunner&MarketID="+req.params.market_id;
@@ -233,7 +232,7 @@ routes.get("/fetch-markets/:event_id/:match_id", [headerVerify], (req, res) => {
 // });
 
 // Fetch market odds of market
-routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res) => {
+routes.get("/fetch-market-odds/:event_id/:market_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getMarketsOdds?EventTypeID=" + req.params.event_id + "&marketId=" + req.params.market_id;
@@ -265,7 +264,7 @@ routes.get("/fetch-market-odds/:event_id/:market_id", [headerVerify], (req, res)
 });
 
 // Fetch market session of market
-routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, res) => {
+routes.get("/fetch-market-session/:event_id/:match_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getSessions?EventTypeID=" + req.params.event_id + "&matchId=" + req.params.match_id;
@@ -297,7 +296,7 @@ routes.get("/fetch-market-session/:event_id/:match_id", [headerVerify], (req, re
 });
 
 // Fetch bookmarker of market
-routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) => {
+routes.get("/fetch-bookmarker/:event_id/:match_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getBookmakers?EventTypeID=" + req.params.event_id + "&EventID=" + req.params.match_id;
@@ -329,7 +328,7 @@ routes.get("/fetch-bookmarker/:event_id/:match_id", [headerVerify], (req, res) =
 });
 
 // Fetch bookmarker odds of market
-routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, res) => {
+routes.get("/fetch-bookmarker-odds/:event_id/:market_id",  (req, res) => {
     try {
 
         const api = process.env.APP_SPORTS_URL + "api/v2/getBookmakerOdds?EventTypeID=" + req.params.event_id + "&marketId=" + req.params.market_id;
@@ -360,7 +359,7 @@ routes.get("/fetch-bookmarker-odds/:event_id/:market_id", [headerVerify], (req, 
     }
 });
 
-routes.get("/update-sports", [headerVerify], async (req, res) => {
+routes.get("/update-sports",  async (req, res) => {
     try {
         // Delete
         await Sports.deleteMany();
