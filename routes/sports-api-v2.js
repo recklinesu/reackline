@@ -411,7 +411,7 @@ routes.get("/get-sports/matches", [headerVerify], async (req, res) => {
         // send 
         res.status(200).json({
             status: true,
-            message: "Updated successfully.",
+            message: "Matches Fetched successfully!",
             data: sportsData.matches
         })
         // res.status(200).json(legues)
