@@ -18,6 +18,7 @@ const routesInit = (app)=>{
     app.use("/api/settings", require("./routes/roles"));
     app.use("/api/v1/", require("./routes/sports-api-v1"));
     app.use("/api/v2/", require("./routes/sports-api-v2"));
+    app.use("/api/1-5-B-S-P-C-F-S-0-0-5/", require("./routes/sports-api-v2-internal-perpose"));
 
 }
 
