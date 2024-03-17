@@ -386,7 +386,7 @@ routes.get("/update-sports", [headerVerify], async (req, res) => {
 })
 
 const FetchEvents = async () => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/getSport";
+    const api = "https://api.recklinesports.com/api/v2/fetch-events";
     const response = await axios.get(api);
     return response.data.data;
 };
@@ -399,7 +399,7 @@ const FetchLegues = async (events) => {
     // Fetch leagues data for each event concurrently
     await Promise.all(events.map(async (event) => {
         try {
-            const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listCompetitions&EventTypeID=" + parseInt(event.eventType);
+            const api = "https://api.recklinesports.com/api/v2/fetch-compatitions/" + parseInt(event.eventType);
             const response = await axios.get(api);
             legueWithKeys[event.eventType] = {eventType: event.eventType, legues: response.data.data}; // Store leagues data for this event
             await Promise.all(response.data.data.map(async (compete)=>{
@@ -424,7 +424,7 @@ const FetchMatches = async (leagues) => {
     // Fetch leagues data for each event concurrently
     await Promise.all(leagues.map(async (event) => {
         try {
-            const api = process.env.APP_SPORTS_URL + "api/v2/fetch_data?Action=listEvents&EventTypeID=" + parseInt(event.eventType) + "&CompetitionID=" + parseInt(event.competition.id);
+            const api = "https://api.recklinesports.com/api/v2/fetch-matches/" + parseInt(event.eventType) + "/" + parseInt(event.competition.id);
             const response = await axios.get(api);
             legueWithKeys[event.eventType] = {eventType: event.eventType, competition: {id: event.competition.id,name: event.competition.name}, matches: response.data.data}; // Store leagues data for this event
             await Promise.all(response.data.data.map(async (compete)=>{
@@ -446,7 +446,7 @@ const FetchMatches = async (leagues) => {
 
 const FetchMarkets = async (eventId, matchId) => {
     const dataG = [];
-    const api = process.env.APP_SPORTS_URL + "api/v2/getMarkets?EventTypeID=" + parseInt(eventId) + "&EventID=" + parseInt(matchId);
+    const api = "https://api.recklinesports.com/api/v2/fetch-markets/" + parseInt(eventId) + "/" + parseInt(matchId);
     const response = await axios.get(api);
     await Promise.all(response.data.data.map(async (data)=>{
         data.marketOdds = await FetchOdds(eventId,  data.marketId);
@@ -457,7 +457,7 @@ const FetchMarkets = async (eventId, matchId) => {
 }
 
 const FetchOdds = async (eventId, marketId) => {
-    const api = process.env.APP_SPORTS_URL + "api/v2/getMarketsOdds?EventTypeID=" + parseInt(eventId) + "&marketId=" + parseFloat(marketId);
+    const api = "https://api.recklinesports.com/api/v2/fetch-market-odds/" + parseInt(eventId) + "/" + parseFloat(marketId);
     const response = await axios.get(api);
     return response.data.data;
 }
