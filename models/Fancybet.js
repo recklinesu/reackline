@@ -20,8 +20,8 @@ const domainSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    default: "unsetteled",
-    enum: ["setteled", "unsetteled"],
+    default: "unsettled",
+    enum: ["settled", "unsettled"],
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
