@@ -25,8 +25,8 @@
     status: {
       type: String,
       required: true,
-      default: "hold",
-      enum: ["hold", "complete"],
+      default: "unsetteled",
+      enum: ["setteled", "unsetteled"],
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
