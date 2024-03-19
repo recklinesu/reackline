@@ -36,6 +36,7 @@
       required: true,
     },
     createdAt: { type: Date, default: Date.now },
+    settledAt: { type: Date, required:false },
   });
 
   const BetModel = mongoose.model("Bet", domainSchema);
