@@ -28,7 +28,7 @@
       type: String,
       required: true,
       default: "unsettled",
-      enum: ["settled", "unsettled"],
+      enum: ["settled", "unsettled","void"],
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

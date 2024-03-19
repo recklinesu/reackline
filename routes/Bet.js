@@ -56,151 +56,6 @@ routes.post("/save", [jwtVerify], [
 
 })
 
-
-// ALL unsettled transaction history to user wallet
-routes.post("/histrory/unsettled/:page?/:pageSize?", [jwtVerify], [
-
-    body("userId").optional().custom(async (value) => {
-        const data = await Users.findById(new mongoose.Types.ObjectId(value));
-        if(!data){
-            throw new Error('User not found!')
-        }
-    })
-
-], async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
-        errors: errors.array(),
-      });
-    }
-    try {
-
-        const page = parseInt(req.params.page) || 1;
-        
-        const pageSize = parseInt(req.params.limit) || 10; 
-
-        let userIdFilter = null;
-
-        if(req.body.userId){
-            userIdFilter = req.body.userId;
-        }else{
-            userIdFilter = req.user._id;
-        }
-
-        const filterCriteria = { createdBy: userIdFilter, status: "unsettled" };
-
-        const totalDocuments = await BetModel.countDocuments(filterCriteria);
-
-        const remainingPages = Math.ceil(
-            (totalDocuments - (page - 1) * pageSize) / pageSize
-          );
-      
-        const totalPages = Math.ceil(totalDocuments / pageSize);
-
-
-        const transactions = await BetModel.find(filterCriteria).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
-
-        if(!transactions.length){
-        return res.status(200).json({
-            status: true,
-            message: "No data found!"
-        })
-        }else{
-        return res.status(200).json({
-            status: true,
-            message: "Bets history fetched successfully.",
-            currentPage: page,
-            pageSize: pageSize,
-            itemCount: transactions.length,
-            totalPages: totalPages,
-            pageItems:transactions
-        })
-        }
-
-    } catch (error) {
-        return res.status(500).json({
-            status: false,
-            message:"Internal error!"+error.message
-        })
-    }
-})
-
-// ALL settled transaction history to user wallet
-routes.post("/histrory/settled/:page?/:pageSize?", [jwtVerify], [
-
-    body("userId").optional().custom(async (value) => {
-        const data = await Users.findById(new mongoose.Types.ObjectId(value));
-        if(!data){
-            throw new Error('User not found!')
-        }
-    })
-
-], async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        status: false,
-        message: errors.array()[0]['path']+" : "+errors.array()[0]['msg'],
-        errors: errors.array(),
-      });
-    }
-    try {
-
-        const page = parseInt(req.params.page) || 1;
-        
-        const pageSize = parseInt(req.params.limit) || 10; 
-
-        let userIdFilter = null;
-
-        if(req.body.userId){
-            userIdFilter = req.body.userId;
-        }else{
-            userIdFilter = req.user._id;
-        }
-
-        const filterCriteria = { createdBy: userIdFilter, status: "settled" };
-
-        const totalDocuments = await BetModel.countDocuments(filterCriteria);
-
-        const remainingPages = Math.ceil(
-            (totalDocuments - (page - 1) * pageSize) / pageSize
-          );
-      
-        const totalPages = Math.ceil(totalDocuments / pageSize);
-
-
-        const transactions = await BetModel.find(filterCriteria).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize);
-
-        if(!transactions.length){
-        return res.status(200).json({
-            status: true,
-            message: "No data found!"
-        })
-        }else{
-        return res.status(200).json({
-            status: true,
-            message: "Bets history fetched successfully.",
-            currentPage: page,
-            pageSize: pageSize,
-            itemCount: transactions.length,
-            totalPages: totalPages,
-            pageItems:transactions
-        })
-        }
-
-    } catch (error) {
-        return res.status(500).json({
-            status: false,
-            message:"Internal error!"+error.message
-        })
-    }
-})
-
 // All transaction history to user wallet
 routes.post("/histrory/:page?/:pageSize?", [jwtVerify], [
 
@@ -209,7 +64,19 @@ routes.post("/histrory/:page?/:pageSize?", [jwtVerify], [
         if(!data){
             throw new Error('User not found!')
         }
-    })
+    }),
+    body("status")
+      .optional()
+      .custom((value) => {
+        if (value === "settled" || value === "unsettled" || value ==="void") {
+          return true;
+        } else {
+          throw new Error(
+            "The status could be either 'settled', 'unsettled' or 'void'"
+          );
+        }
+      }),
+    body("sportsName").optional().notEmpty().withMessage("Sport name is required."),
 
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -236,6 +103,14 @@ routes.post("/histrory/:page?/:pageSize?", [jwtVerify], [
         }
 
         const filterCriteria = { createdBy: userIdFilter };
+
+        if(req.body.status){
+            filterCriteria["status"] =  req.body.status;
+        }
+
+        if(req.body.sportsName){
+            filterCriteria["sportsName"] =  req.body.sportsName;
+        }
 
         const totalDocuments = await BetModel.countDocuments(filterCriteria);
 
