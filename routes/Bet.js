@@ -57,7 +57,7 @@ routes.post("/save", [jwtVerify], [
 })
 
 // All transaction history to user wallet
-routes.post("/histroy/:page?/:pageSize?", [jwtVerify], [
+routes.post("/history/:page?/:pageSize?", [jwtVerify], [
 
     body("userId").optional().custom(async (value) => {
         const data = await Users.findById(new mongoose.Types.ObjectId(value));
