@@ -5,22 +5,24 @@
     eventId: { type: String, required: true },
     legueId: { type: String, required: true },
     matchId: { type: String, required: true },
-    marketId: { type: String, required: true },
     sportsName: { type: String, required: true },
     event: { type: String, required: true },
     markettype: { type: String, required: true },
     selection: { type: String, required: true },
     selectionId: { type: String, required: true },
     type: { type: String, required: true },
-    oddsReq: { type: String, required: true },
     stake: { type: Number, required: true },
     placeTime: { type: String, required: true },
     favourMargin: { type: Number, required: true },
     againstMargin: { type: Number, required: true },
-    runnersCount: { type: Number, required: true },
+    marketId: { type: String, required: false },
+    oddsReq: { type: String, required: false },
+    runnersCount: { type: Number, required: false },
+    size: { type: Number, required: false },
+    price: { type: Number, required: false },
     runners: {
       type: Array,
-      required: true
+      required: false
     },
     status: {
       type: String,
@@ -36,15 +38,15 @@
     createdAt: { type: Date, default: Date.now },
   });
 
-  const OddsBet = mongoose.model("oddsBet", domainSchema);
+  const BetModel = mongoose.model("Bet", domainSchema);
 
   (async () => {
     try {
-      await OddsBet.createIndexes();
-      console.log("OddsBet created successfully \n ======================================>");
+      await BetModel.createIndexes();
+      console.log("Bets created successfully \n ======================================>");
     } catch (error) {
       console.error("Error creating indexes:", error.message);
     }
   })();
 
-  module.exports = OddsBet;
+  module.exports = BetModel;
