@@ -225,6 +225,8 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
           favourMargin: { $sum: "$favourMargin" }, // Include the first sportsName within each group
           againstMargin: { $sum: "$againstMargin" }, // Include the first sportsName within each group
           markettype: { $first: "$markettype" }, // Include the first event within each group
+          selectionId: { $first: "$selectionId" }, // Include the first event within each group
+          selection: { $first: "$selection" }, // Include the first event within each group
           count: { $sum: 1 } // Count documents in each group
         }
       }
