@@ -169,6 +169,8 @@ routes.get("/trade/list", [jwtVerify], async (req, res) => {
           sportsName: { $first: "$sportsName" }, // Include the first sportsName within each group
           matchId: { $first: "$matchId" }, // Include the first sportsName within each group
           event: { $first: "$event" }, // Include the first event within each group
+          eventId: { $first: "$eventId" }, // Include the first event within each group
+          legueId: { $first: "$legueId" }, // Include the first event within each group
           markettype: { $first: "$markettype" }, // Include the first event within each group
           count: { $sum: 1 } // Count documents in each group
         }
