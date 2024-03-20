@@ -2,6 +2,7 @@ const express = require("express");
 const jwtVerify = require("../middleware/jwtAuth");
 const { body, validationResult } = require("express-validator");
 const BetModel = require("../models/Bet");
+const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
 
@@ -143,6 +144,40 @@ routes.post("/history/:page?/:pageSize?", [jwtVerify], [
       })
     }
 
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal error!" + error.message
+    })
+  }
+})
+
+routes.get("/trade/list", [jwtVerify], async (req, res) => {
+  try {
+
+    const data = await BetModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user._id) // Add your user ID here to filter data created by you
+        }
+      },
+      {
+        $group: {
+          _id: "$matchId", // Group by matchId field
+          totalStake: { $sum: "$stake" }, // Calculate the total stake for each matchId
+          sportsName: { $first: "$sportsName" }, // Include the first sportsName within each group
+          matchId: { $first: "$matchId" }, // Include the first sportsName within each group
+          event: { $first: "$event" }, // Include the first event within each group
+          count: { $sum: 1 } // Count documents in each group
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      status: true,
+      message: "Trades has been fetched successfully!",
+      data
+    })
   } catch (error) {
     return res.status(500).json({
       status: false,
