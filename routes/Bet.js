@@ -188,4 +188,22 @@ routes.get("/trade/list", [jwtVerify], async (req, res) => {
   }
 })
 
+routes.get("/bet-details/list/:matchId", [jwtVerify], async (req, res) => {
+  try {
+
+    const data = await BetModel.find({matchId: req.params.matchId, createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled"})
+
+    res.status(200).json({
+      status: true,
+      message: "Bets has been fetched successfully!",
+      data
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal error!" + error.message
+    })
+  }
+})
+
 module.exports = routes
