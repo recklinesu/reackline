@@ -158,7 +158,8 @@ routes.get("/trade/list", [jwtVerify], async (req, res) => {
     const data = await BetModel.aggregate([
       {
         $match: {
-          createdBy: new mongoose.Types.ObjectId(req.user._id) // Add your user ID here to filter data created by you
+          createdBy: new mongoose.Types.ObjectId(req.user._id), // Add your user ID here to filter data created by you
+          status: "unsettled"
         }
       },
       {
