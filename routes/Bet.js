@@ -253,10 +253,10 @@ routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
     const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
 
     function calculateExposure(bet) {
-      if (bet.type === 'back') {
+      if (bet.type === 'lay') {
         // For back bet, exposure is equal to the stake
         return bet.stake;
-      } else if (bet.type === 'lay') {
+      } else if (bet.type === 'back') {
         // For lay bet, exposure is stake multiplied by (odds - 1)
         return bet.stake * (bet.oddsReq - 1);
       }
