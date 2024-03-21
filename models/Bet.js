@@ -16,7 +16,7 @@
     favourMargin: { type: Number, required: true },
     againstMargin: { type: Number, required: true },
     marketId: { type: String, required: false },
-    oddsReq: { type: String, required: false },
+    oddsReq: { type: Number, required: false },
     runnersCount: { type: Number, required: false },
     size: { type: Number, required: false },
     price: { type: Number, required: false },
