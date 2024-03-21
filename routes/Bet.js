@@ -194,7 +194,7 @@ routes.get("/trade/list", [jwtVerify], async (req, res) => {
 routes.get("/bet-details/list/:matchId", [jwtVerify], async (req, res) => {
   try {
 
-    const data = await BetModel.find({matchId: req.params.matchId, createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled"})
+    const data = await BetModel.find({ matchId: req.params.matchId, createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" })
 
     res.status(200).json({
       status: true,
@@ -250,94 +250,45 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
 routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
   try {
 
-    let exposure = 0;
+    const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
 
-    const countBets = await BetModel.countDocuments({
-      createdBy: new mongoose.Types.ObjectId(req.user._id),
-      status: "unsettled"
-    });
-
-    if(countBets === 0){
-      res.status(200).json({
-        status: true,
-        message: "Exposure has been fetched successfully!",
-        data: {
-          exposure: exposure
-        }
-      })
+    function calculateExposure(bet) {
+      if (bet.type === 'back') {
+        // For back bet, exposure is equal to the stake
+        return bet.stake;
+      } else if (bet.type === 'lay') {
+        // For lay bet, exposure is stake multiplied by (odds - 1)
+        return bet.stake * (bet.oddsReq - 1);
+      }
     }
 
-    if(countBets === 1){
+    // Function to calculate the total exposure from multiple bets
+    // Function to calculate the total exposure from multiple bets
+    function calculateTotalExposure(bets) {
+      let totalExposure = 0;
 
-      const data = await BetModel.aggregate([
-        {
-          $match: {
-            createdBy: new mongoose.Types.ObjectId(req.user._id),
-            status: "unsettled"
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            totalFevourMargin: { $sum: "$favourMargin" },
-            totalAgainstMargin: { $sum: "$againstMargin" }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            totalFevourMargin: 1,
-            totalAgainstMargin: 1
-          }
-        }
-      ]);
-
-      exposure += data[0].totalAgainstMargin;
-
-      res.status(200).json({
-        status: true,
-        message: "Exposure has been fetched successfully!",
-        data: {
-          exposure: exposure
-        }
-      })
-
-    }
-
-    const data = await BetModel.aggregate([
-      {
-        $match: {
-          createdBy: new mongoose.Types.ObjectId(req.user._id),
-          status: "unsettled"
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalFevourMargin: { $sum: "$favourMargin" },
-          totalAgainstMargin: { $sum: "$againstMargin" }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalFevourMargin: 1,
-          totalAgainstMargin: 1
+      // Iterate over each bet
+      for (const bet of bets) {
+        // Calculate the exposure for the current bet
+        const exposure = calculateExposure(bet);
+        // Subtract stake of back bets from the exposure of lay bets
+        if (bet.type === 'back') {
+          totalExposure -= bet.stake;
+        } else {
+          totalExposure += exposure;
         }
       }
-    ]);
 
-    exposure = (data[0].totalAgainstMargin - data[0].totalFevourMargin);
-
-    if(exposure < 0){
-      exposure = 0;
+      return totalExposure;
     }
+
+    const totalExposure = calculateTotalExposure(allBets);
 
     res.status(200).json({
       status: true,
       message: "Exposure has been fetched successfully!",
       data: {
-        exposure: exposure
+        exposure: totalExposure
       }
     })
   } catch (error) {
