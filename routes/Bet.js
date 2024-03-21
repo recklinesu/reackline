@@ -252,37 +252,24 @@ routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
 
     const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
 
-    function calculateExposure(bet) {
-      if (bet.type === 'back') {
-        // For back bet, exposure is equal to the stake
-        return bet.stake;
-      } else if (bet.type === 'lay') {
-        // For lay bet, exposure is stake multiplied by (odds - 1)
-        return bet.stake * (bet.oddsReq - 1);
-      }
-    }
-
-    // Function to calculate the total exposure from multiple bets
-    // Function to calculate the total exposure from multiple bets
-    function calculateTotalExposure(bets) {
+    // Function to calculate the exposure for a single bet
+    function calculateExposure(bets) {
       let totalExposure = 0;
-
-      // Iterate over each bet
+    
       for (const bet of bets) {
-        // Calculate the exposure for the current bet
-        const exposure = calculateExposure(bet);
-        // Subtract stake of back bets from the exposure of lay bets
         if (bet.type === 'back') {
-          totalExposure -= bet.stake;
+          totalExposure += bet.stake;
+        } else if (bet.type === 'lay') {
+          totalExposure += bet.stake * (1 - (1 / bet.odds));
         } else {
-          totalExposure += exposure;
+          throw new Error('Invalid bet type');
         }
       }
-
+    
       return totalExposure;
     }
 
-    const totalExposure = calculateTotalExposure(allBets);
+    const totalExposure = calculateExposure(allBets);
 
     res.status(200).json({
       status: true,
