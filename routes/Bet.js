@@ -245,4 +245,82 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
     })
   }
 })
+
+
+routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
+  try {
+
+    const data = await BetModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user._id),
+          status: "unsettled"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalFevourMargin: { $sum: "$favourMargin" },
+          totalAgainstMargin: { $sum: "$againstMargin" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalFevourMargin: 1,
+          totalAgainstMargin: 1
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      status: true,
+      message: "Exposure has been fetched successfully!",
+      data
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal error!" + error.message
+    })
+  }
+})
+
+routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) => {
+  try {
+
+    const data = await BetModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user._id), // Add your user ID here to filter data created by you
+          status: "unsettled",
+          matchId: req.params.matchId
+        }
+      },
+      {
+        $group: {
+          _id: "$selectionId", // Group by matchId field
+          totalStake: { $sum: "$stake" }, // Calculate the total stake for each matchId
+          favourMargin: { $sum: "$favourMargin" }, // Include the first sportsName within each group
+          againstMargin: { $sum: "$againstMargin" }, // Include the first sportsName within each group
+          markettype: { $first: "$markettype" }, // Include the first event within each group
+          selectionId: { $first: "$selectionId" }, // Include the first event within each group
+          selection: { $first: "$selection" }, // Include the first event within each group
+          count: { $sum: 1 } // Count documents in each group
+        }
+      }
+    ]);
+    res.status(200).json({
+      status: true,
+      message: "Bets has been fetched successfully!",
+      data
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal error!" + error.message
+    })
+  }
+})
+
 module.exports = routes
