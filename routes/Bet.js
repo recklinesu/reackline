@@ -250,6 +250,60 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
 routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
   try {
 
+    let exposure = 0;
+
+    const countBets = await BetModel.countDocuments({
+      createdBy: new mongoose.Types.ObjectId(req.user._id),
+      status: "unsettled"
+    });
+
+    if(countBets === 0){
+      res.status(200).json({
+        status: true,
+        message: "Exposure has been fetched successfully!",
+        data: {
+          exposure: exposure
+        }
+      })
+    }
+
+    if(countBets === 1){
+
+      const data = await BetModel.aggregate([
+        {
+          $match: {
+            createdBy: new mongoose.Types.ObjectId(req.user._id),
+            status: "unsettled"
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalFevourMargin: { $sum: "$favourMargin" },
+            totalAgainstMargin: { $sum: "$againstMargin" }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            totalFevourMargin: 1,
+            totalAgainstMargin: 1
+          }
+        }
+      ]);
+
+      exposure += data[0].totalAgainstMargin;
+
+      res.status(200).json({
+        status: true,
+        message: "Exposure has been fetched successfully!",
+        data: {
+          exposure: exposure
+        }
+      })
+
+    }
+
     const data = await BetModel.aggregate([
       {
         $match: {
@@ -273,10 +327,18 @@ routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
       }
     ]);
 
+    exposure = (data[0].totalAgainstMargin - data[0].totalFevourMargin);
+
+    if(exposure < 0){
+      exposure = 0;
+    }
+
     res.status(200).json({
       status: true,
       message: "Exposure has been fetched successfully!",
-      data
+      data: {
+        exposure: exposure
+      }
     })
   } catch (error) {
     return res.status(500).json({
