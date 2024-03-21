@@ -260,7 +260,7 @@ routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
         if (bet.type === 'back') {
           totalExposure += bet.stake;
         } else if (bet.type === 'lay') {
-          totalExposure += bet.stake * (1 - (1 / bet.odds));
+          totalExposure += bet.stake * (1 - (1 / bet.oddsReq));
         } else {
           throw new Error('Invalid bet type');
         }
