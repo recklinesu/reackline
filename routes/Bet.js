@@ -366,7 +366,7 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
   }
 })
 
-routes.get("/exposure/get",[jwtVerify]. async (req, res)=>{
+routes.get("/exposure/get",[jwtVerify], async (req, res)=>{
 
 })
 
