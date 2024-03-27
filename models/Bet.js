@@ -37,7 +37,7 @@
     },
     amount: { type: Number, default: 0 },
     betStatus: { type: Number, default: 0 },
-    Narration: { type: String, required:false },
+    Narration: { type: String, default: "Bet Placed.", required:false },
     createdAt: { type: Date, default: Date.now },
     settledAt: { type: Date, required:false },
   });
