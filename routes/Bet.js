@@ -247,88 +247,88 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
 })
 
 
-// routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
-//   try {
+routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
+  try {
 
-//     let exposure = 0;
-//     // const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
+    let exposure = 0;
+    const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
 
-//     // get all matches
-//     const matches = await BetModel.aggregate([
-//       {
-//         $match: {
-//           createdBy: new mongoose.Types.ObjectId(req.user._id), // Add your user ID here to filter data created by you
-//           status: "unsettled"
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: "$matchId", // Group by matchId field
-//           totalStake: { $sum: "$stake" }, // Calculate the total stake for each matchId
-//           sportsName: { $first: "$sportsName" }, // Include the first sportsName within each group
-//           matchId: { $first: "$matchId" }, // Include the first sportsName within each group
-//           event: { $first: "$event" }, // Include the first event within each group
-//           eventId: { $first: "$eventId" }, // Include the first event within each group
-//           legueId: { $first: "$legueId" }, // Include the first event within each group
-//           markettype: { $first: "$markettype" }, // Include the first event within each group
-//           count: { $sum: 1 } // Count documents in each group
-//         }
-//       }
-//     ]);
+    // get all matches
+    const matches = await BetModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(req.user._id), // Add your user ID here to filter data created by you
+          status: "unsettled"
+        }
+      },
+      {
+        $group: {
+          _id: "$matchId", // Group by matchId field
+          totalStake: { $sum: "$stake" }, // Calculate the total stake for each matchId
+          sportsName: { $first: "$sportsName" }, // Include the first sportsName within each group
+          matchId: { $first: "$matchId" }, // Include the first sportsName within each group
+          event: { $first: "$event" }, // Include the first event within each group
+          eventId: { $first: "$eventId" }, // Include the first event within each group
+          legueId: { $first: "$legueId" }, // Include the first event within each group
+          markettype: { $first: "$markettype" }, // Include the first event within each group
+          count: { $sum: 1 } // Count documents in each group
+        }
+      }
+    ]);
 
-//     await Promise.all(matches.map(async (item) => {
+    await Promise.all(matches.map(async (item) => {
 
-//       const selections = await BetModel.aggregate([
-//         {
-//           $match: {
-//             createdBy: new mongoose.Types.ObjectId(req.user._id),
-//             status: "unsettled",
-//             matchId: item.matchId
-//           }
-//         },
-//         {
-//           $group: {
-//             _id: {
-//               selectionId: "$selectionId",
-//               type: "$type"
-//             },
-//             totalStake: { $sum: "$stake" },
-//             team: { $first: "$selection" },
-//             type: { $first: "$type" },
-//             favourMargin: { $sum: "$favourMargin" },
-//             againstMargin: { $sum: "$againstMargin" },
-//             oddsReq: { $sum: "$oddsReq" },
-//             stake: { $sum: "$stake" },
-//             markettype: { $first: "$markettype" },
-//             selectionId: { $first: "$selectionId" },
-//             selection: { $first: "$selection" },
-//             count: { $sum: 1 }
-//           }
-//         }
-//       ]);
+      const selections = await BetModel.aggregate([
+        {
+          $match: {
+            createdBy: new mongoose.Types.ObjectId(req.user._id),
+            status: "unsettled",
+            matchId: item.matchId
+          }
+        },
+        {
+          $group: {
+            _id: {
+              selectionId: "$selectionId",
+              type: "$type"
+            },
+            totalStake: { $sum: "$stake" },
+            team: { $first: "$selection" },
+            type: { $first: "$type" },
+            favourMargin: { $sum: "$favourMargin" },
+            againstMargin: { $sum: "$againstMargin" },
+            oddsReq: { $sum: "$oddsReq" },
+            stake: { $sum: "$stake" },
+            markettype: { $first: "$markettype" },
+            selectionId: { $first: "$selectionId" },
+            selection: { $first: "$selection" },
+            count: { $sum: 1 }
+          }
+        }
+      ]);
       
 
-//       console.log(selections);
+      console.log(selections);
 
-//       await Promise.all(selections.map(async (value, index) =>{
-//         exposure = Math.abs(exposure) - parseInt(value.againstMargin);
-//       }))
-//     }))
+      await Promise.all(selections.map(async (value, index) =>{
+        exposure = Math.abs(exposure) - parseInt(value.againstMargin);
+      }))
+    }))
 
-//     res.status(200).json({
-//       status: true,
-//       message: "Exposure has been fetched successfully!",
-//       data: {
-//         exposure: Math.abs(exposure),
-//       }
-//     })
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal error!" + error.message
-//     })
-//   }
-// })
+    res.status(200).json({
+      status: true,
+      message: "Exposure has been fetched successfully!",
+      data: {
+        exposure: Math.abs(exposure),
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal error!" + error.message
+    })
+  }
+})
 
 routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) => {
   try {
@@ -365,6 +365,10 @@ routes.get("/get-selection-group/list/:matchId", [jwtVerify], async (req, res) =
       message: "Internal error!" + error.message
     })
   }
+})
+
+routes.get("/exposure/get",[jwtVerify]. async (req, res)=>{
+
 })
 
 const calculateExposure = (bets) => {
