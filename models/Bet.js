@@ -35,6 +35,9 @@
       ref: "User",
       required: true,
     },
+    amount: { type: Number, default: 0 },
+    betStatus: { type: Number, default: 0 },
+    Narration: { type: String, required:false },
     createdAt: { type: Date, default: Date.now },
     settledAt: { type: Date, required:false },
   });
