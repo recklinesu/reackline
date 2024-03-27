@@ -251,7 +251,6 @@ routes.get("/fetch-exposure", [jwtVerify], async (req, res) => {
   try {
 
     let exposure = 0;
-    const allBets = await BetModel.find({ createdBy: new mongoose.Types.ObjectId(req.user._id), status: "unsettled" });
 
     // get all matches
     const matches = await BetModel.aggregate([
